@@ -4,6 +4,7 @@ import '../../main.dart';
 import '../../models/game_data.dart';
 import '../../state/editor_controller.dart';
 import '../widgets/common.dart';
+import '../widgets/item_icon.dart';
 import '../widgets/item_picker.dart';
 
 /// 属性加点（wb）7 个方向，闪避上限 25，其余 196。
@@ -291,26 +292,23 @@ class _SlotTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Container(
-              width: 34,
-              height: 34,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: empty
-                    ? theme.colorScheme.surfaceContainerHigh
-                    : dmgColor.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(9),
-              ),
-              child: empty
-                  ? Icon(Icons.add, size: 18, color: theme.colorScheme.outline)
-                  : Text(
-                      meta.label.characters.first,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        color: dmgColor,
-                      ),
+            empty
+                ? Container(
+                    width: 34,
+                    height: 34,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHigh,
+                      borderRadius: BorderRadius.circular(8),
                     ),
-            ),
+                    child: Icon(Icons.add,
+                        size: 18, color: theme.colorScheme.outline),
+                  )
+                : ItemIcon(
+                    catalog: EditorScope.read(context).catalog,
+                    itemId: itemId,
+                    size: 34,
+                  ),
             const SizedBox(width: 10),
             Expanded(
               child: Column(

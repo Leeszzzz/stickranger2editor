@@ -60,10 +60,21 @@ class _DataScreenState extends State<DataScreen> {
         );
       }
     } catch (e) {
-      if (mounted) showAppSnackBar(context, '更新失败：$e', error: true);
+      if (mounted) showAppSnackBar(context, '更新失败：${_friendlyError(e)}', error: true);
     } finally {
       if (mounted) setState(() => _updating = false);
     }
+  }
+
+  String _friendlyError(Object e) {
+    final s = '$e';
+    if (s.contains('SocketException') ||
+        s.contains('Failed host lookup') ||
+        s.contains('Network is unreachable')) {
+      return '网络不可用，请检查设备网络后重试';
+    }
+    if (s.contains('TimeoutException')) return '连接超时，请稍后重试';
+    return s;
   }
 
   Future<void> _restoreBuiltin() async {

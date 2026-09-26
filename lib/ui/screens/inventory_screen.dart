@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../main.dart';
-import '../../models/game_data.dart';
 import '../../state/editor_controller.dart';
 import '../widgets/common.dart';
+import '../widgets/item_icon.dart';
 
 const List<String> _categoryChips = [
   '全部',
@@ -103,7 +103,12 @@ class _InventoryScreenState extends State<InventoryScreen> {
                           Padding(
                             padding: const EdgeInsets.only(right: 6),
                             child: ChoiceChip(
-                              label: Text(_categoryChips[i]),
+                              // CanvasKit 下部分中文字形测量宽 < 绘制宽，
+                              // 禁止按测量框裁剪，避免「弓」「杖」右半被切。
+                              label: Text(
+                                _categoryChips[i],
+                                overflow: TextOverflow.visible,
+                              ),
                               selected: _category == i,
                               visualDensity: VisualDensity.compact,
                               onSelected: (_) => setState(() => _category = i),
@@ -223,8 +228,6 @@ class _InventoryTile extends StatelessWidget {
     final count = controller.itemCount(itemId);
     final stats = catalog.itemStats(itemId);
     final name = catalog.itemName(itemId);
-    final dmg = stats?.damageType ?? 'Physical';
-    final dmgColor = Color(damageTypeColors[dmg] ?? 0xFF8B949E);
     final showStats = stats != null && stats.atMax > 0;
     // 武器 / 技能类物品的数量格存的是等级：0 = 未获取，1+ = 等级。
     final isLevel = stats != null &&
@@ -240,24 +243,7 @@ class _InventoryTile extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           child: Row(
             children: [
-              Container(
-                width: 38,
-                height: 38,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: count > 0
-                      ? dmgColor.withValues(alpha: 0.15)
-                      : theme.colorScheme.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  catalog.categoryLabel(itemId).characters.first,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: count > 0 ? dmgColor : theme.colorScheme.outline,
-                  ),
-                ),
-              ),
+              ItemIcon(catalog: catalog, itemId: itemId, size: 38),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(

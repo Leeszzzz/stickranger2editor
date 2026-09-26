@@ -12,6 +12,7 @@ Stick Ranger 2 存档编辑器的 Flutter 实现，Material 3 设计，洞穴靛
 - **进度**：32 关卡按区域分组解锁；128 成就按关卡分组完成 / 清零（写入目标值）；10 勋章解锁；饭团（回血道具）数量；128 怪物图鉴三态（未遇 / 遇见 / 已查看）；自动移动、悬崖停止、关卡事件标记
 - **数据**：从 dan-ball.jp 拉取最新 `ranger2.js` 重新解析物品 / 成就 / 关卡 / 勋章数据（`SharedPreferences` 持久化，可一键恢复内置数据）
 - **主题**：浅色 / 深色 / 跟随系统，自适应布局——宽屏左侧 NavigationRail，窄屏底部 NavigationBar
+- **物品图标**：从游戏 `item.png` 精灵图按 16×16 网格切块（`assets/icons/`，73 枚），背包 / 物品选择器 / 装备槽显示原版像素图标，无对应资产的物品回退为分类首字徽章
 
 ## 项目结构
 
@@ -31,7 +32,8 @@ sr2editor/
 │       ├── screens/              # 存档 / 总览 / 角色 / 背包 / 进度 / 数据
 │       └── widgets/              # 统计卡 / 区块卡 / 数字编辑器 / 物品选择器
 ├── assets/                       # item_stats.json + achievement_data.json（随包内置）
-└── test/codec_test.dart          # 编解码 + 控制器 + 目录单元测试（15 项）
+├── assets/icons/                 # 物品精灵图切块 icon_NNN.png（索引 = 行*16+列）
+└── test/                         # 编解码 + 控制器 + 图标资产单元测试（17 项）
 ```
 
 ## 编解码核心

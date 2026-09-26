@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/game_data.dart';
 import 'common.dart';
+import 'item_icon.dart';
 
 /// 装备槽定义（与存档 ac[4][8] 对应）。
 class SlotMeta {
@@ -139,7 +140,10 @@ class _ItemPickerDialogState extends State<_ItemPickerDialog> {
                   children: [
                     for (var i = 0; i < _subtypes.length; i++)
                       ChoiceChip(
-                        label: Text(_subtypes[i]),
+                        label: Text(
+                          _subtypes[i],
+                          overflow: TextOverflow.visible,
+                        ),
                         selected: _selectedSubtype == i,
                         onSelected: (_) => setState(() => _selectedSubtype = i),
                         visualDensity: VisualDensity.compact,
@@ -194,7 +198,6 @@ class _ItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final stats = catalog.itemStats(itemId);
     final name = catalog.itemName(itemId);
     final dmg = stats?.damageType ?? 'Physical';
@@ -211,23 +214,7 @@ class _ItemTile extends StatelessWidget {
     return ListTile(
       dense: true,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      leading: Container(
-        width: 36,
-        height: 36,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Text(
-          catalog.categoryLabel(itemId).characters.first,
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            color: dmgColor,
-          ),
-        ),
-      ),
+      leading: ItemIcon(catalog: catalog, itemId: itemId, size: 36),
       title: Text(
         name,
         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),

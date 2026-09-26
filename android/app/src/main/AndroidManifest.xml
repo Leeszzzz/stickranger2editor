@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 数据页「从官网更新」需要联网 -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="sr2editor"
         android:name="${applicationName}"
