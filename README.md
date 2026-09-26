@@ -1,7 +1,6 @@
-# SR2Editor（Flutter 版）
+# SR2Editor
 
-Stick Ranger 2 存档编辑器的 Flutter 实现，Material 3 设计，洞穴靛蓝 + 琥珀主题（深 / 浅双模式）。
-一套代码运行在 Windows / Android / Web / iOS / macOS / Linux。
+Stick Ranger 2 存档编辑器的实现
 
 ## 功能
 
