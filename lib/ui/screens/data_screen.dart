@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../main.dart';
 import '../../models/game_data.dart';
@@ -75,6 +76,18 @@ class _DataScreenState extends State<DataScreen> {
     }
     if (s.contains('TimeoutException')) return '连接超时，请稍后重试';
     return s;
+  }
+
+  Future<void> _launchBilibili(BuildContext context) async {
+    final uri = Uri.parse('https://space.bilibili.com/622550948');
+    try {
+      final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!ok && context.mounted) {
+        showAppSnackBar(context, '无法打开浏览器链接', error: true);
+      }
+    } catch (_) {
+      if (context.mounted) showAppSnackBar(context, '无法打开浏览器链接', error: true);
+    }
   }
 
   Future<void> _restoreBuiltin() async {
@@ -193,6 +206,57 @@ class _DataScreenState extends State<DataScreen> {
                     '⚠ 修改存档前请务必备份原始字符串。',
                     style: theme.textTheme.bodySmall
                         ?.copyWith(color: theme.colorScheme.tertiary),
+                  ),
+                  const Divider(height: 24),
+                  Row(
+                    children: [
+                      Icon(Icons.person_outline_rounded,
+                          size: 16, color: theme.colorScheme.onSurfaceVariant),
+                      const SizedBox(width: 8),
+                      Text(
+                        '作者：',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      Text(
+                        'Leesz',
+                        style: theme.textTheme.bodyMedium
+                            ?.copyWith(fontWeight: FontWeight.w700),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.play_circle_outline_rounded,
+                          size: 16, color: theme.colorScheme.onSurfaceVariant),
+                      const SizedBox(width: 8),
+                      Text(
+                        'bilibili：',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      Flexible(
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(6),
+                          onTap: () => _launchBilibili(context),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 2),
+                            child: Text(
+                              'space.bilibili.com/622550948',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.primary,
+                                decoration: TextDecoration.underline,
+                                decorationColor:
+                                    theme.colorScheme.primary.withValues(alpha: 0.5),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
