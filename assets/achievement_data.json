@@ -1,0 +1,223 @@
+{
+  "stages": [
+    {
+      "id": 0,
+      "name": "",
+      "area": 0
+    },
+    {
+      "id": 1,
+      "name": "Village",
+      "area": 0
+    },
+    {
+      "id": 2,
+      "name": "Cave 1",
+      "area": 0
+    },
+    {
+      "id": 3,
+      "name": "Cave 2",
+      "area": 0
+    },
+    {
+      "id": 4,
+      "name": "Cave 3",
+      "area": 0
+    },
+    {
+      "id": 5,
+      "name": "Cave 4",
+      "area": 0
+    },
+    {
+      "id": 6,
+      "name": "Central cavity",
+      "area": 0
+    },
+    {
+      "id": 7,
+      "name": "Terraced cave",
+      "area": 0
+    },
+    {
+      "id": 8,
+      "name": "Sky garden",
+      "area": 1
+    },
+    {
+      "id": 9,
+      "name": "Sky garden 2",
+      "area": 1
+    },
+    {
+      "id": 10,
+      "name": "Sky garden 3",
+      "area": 1
+    },
+    {
+      "id": 11,
+      "name": "Upper cave",
+      "area": 1
+    },
+    {
+      "id": 12,
+      "name": "Terrace",
+      "area": 1
+    },
+    {
+      "id": 13,
+      "name": "Limestone cave 1",
+      "area": 2
+    },
+    {
+      "id": 14,
+      "name": "Limestone cave 2",
+      "area": 2
+    },
+    {
+      "id": 15,
+      "name": "Limestone cave 3",
+      "area": 2
+    },
+    {
+      "id": 16,
+      "name": "Limestone cave 4",
+      "area": 2
+    },
+    {
+      "id": 17,
+      "name": "Limestone cave 5",
+      "area": 2
+    },
+    {
+      "id": 18,
+      "name": "Limestone cave 6",
+      "area": 2
+    },
+    {
+      "id": 19,
+      "name": "Limestone cave 7",
+      "area": 2
+    },
+    {
+      "id": 20,
+      "name": "Limestone cave 8",
+      "area": 2
+    },
+    {
+      "id": 21,
+      "name": "Snow field 1",
+      "area": 3
+    }
+  ],
+  "achievements": [],
+  "medals": [
+    {
+      "name": "Gold Shower",
+      "value": 15
+    },
+    {
+      "name": "Clear Status",
+      "value": 30
+    },
+    {
+      "name": "ONIGIRI",
+      "value": 45
+    },
+    {
+      "name": "Level Up",
+      "value": 60
+    },
+    {
+      "name": "Warp Zone",
+      "value": 75
+    }
+  ],
+  "stage_medal_items": {
+    "2": {
+      "item_id": 72,
+      "name": "Craft Amulet"
+    },
+    "3": {
+      "item_id": 74,
+      "name": "Shell Amulet"
+    },
+    "4": {
+      "item_id": 76,
+      "name": "Elf Amulet"
+    },
+    "5": {
+      "item_id": 78,
+      "name": "Crystal Amulet"
+    },
+    "7": {
+      "item_id": 80,
+      "name": "Bandit Amulet"
+    },
+    "8": {
+      "item_id": 82,
+      "name": "Amethyst Amulet"
+    },
+    "9": {
+      "item_id": 84,
+      "name": "Platinum Amulet"
+    },
+    "10": {
+      "item_id": 86,
+      "name": "Citrine Amulet"
+    },
+    "11": {
+      "item_id": 88,
+      "name": "Sapphire Amulet"
+    },
+    "13": {
+      "item_id": 114,
+      "name": ""
+    },
+    "14": {
+      "item_id": 116,
+      "name": "Peridot Amulet"
+    },
+    "15": {
+      "item_id": 118,
+      "name": "Ammolite Amulet"
+    },
+    "16": {
+      "item_id": 120,
+      "name": "Warrior Amulet"
+    },
+    "17": {
+      "item_id": 139,
+      "name": "Giant Amulet"
+    },
+    "18": {
+      "item_id": 140,
+      "name": "Moon Amulet"
+    },
+    "19": {
+      "item_id": 141,
+      "name": "Fire Charm"
+    }
+  },
+  "achievement_groups": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    []
+  ]
+}
