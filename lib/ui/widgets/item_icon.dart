@@ -30,6 +30,23 @@ class ItemIcon extends StatelessWidget {
     if (hasAsset) {
       final dmg = stats?.damageType ?? 'Physical';
       final dmgColor = Color(damageTypeColors[dmg] ?? 0xFF8B949E);
+      // 游戏内物品图标用 r[i][5]（0xRRGGBB）乘法染色：白→物品色、灰→暗部。
+      final tintColor = stats != null && stats.color > 0 && stats.color != 0xFFFFFF
+          ? Color(0xFF000000 | stats.color)
+          : null;
+      Widget img = Image.asset(
+        iconAssetPath(iconIndex),
+        width: size * 0.82,
+        height: size * 0.82,
+        filterQuality: FilterQuality.none,
+        fit: BoxFit.contain,
+      );
+      if (tintColor != null) {
+        img = ColorFiltered(
+          colorFilter: ColorFilter.mode(tintColor, BlendMode.modulate),
+          child: img,
+        );
+      }
       return Container(
         width: size,
         height: size,
@@ -38,13 +55,7 @@ class ItemIcon extends StatelessWidget {
           color: dmgColor.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(size * 0.24),
         ),
-        child: Image.asset(
-          iconAssetPath(iconIndex),
-          width: size * 0.82,
-          height: size * 0.82,
-          filterQuality: FilterQuality.none,
-          fit: BoxFit.contain,
-        ),
+        child: img,
       );
     }
 

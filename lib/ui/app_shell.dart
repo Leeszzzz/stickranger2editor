@@ -16,16 +16,8 @@ class NavDestination {
   final WidgetBuilder builder;
 }
 
-class AppShell extends StatefulWidget {
+class AppShell extends StatelessWidget {
   const AppShell({super.key});
-
-  @override
-  State<AppShell> createState() => _AppShellState();
-}
-
-class _AppShellState extends State<AppShell> {
-  int _index = 0;
-  ValueNotifier<int>? _nav;
 
   static final List<NavDestination> _destinations = [
     NavDestination('存档', Icons.save_outlined, Icons.save, (_) => const SaveScreen()),
@@ -37,91 +29,80 @@ class _AppShellState extends State<AppShell> {
   ];
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final nav = AppDeps.of(context).navIndex;
-    if (!identical(nav, _nav)) {
-      _nav?.removeListener(_onNavIndex);
-      nav.addListener(_onNavIndex);
-      _nav = nav;
-    }
-  }
-
-  @override
-  void dispose() {
-    _nav?.removeListener(_onNavIndex);
-    super.dispose();
-  }
-
-  void _onNavIndex() {
-    if (mounted) setState(() => _index = _nav?.value ?? 0);
-  }
-
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final deps = AppDeps.of(context);
     final controller = deps.controller;
     final wide = MediaQuery.sizeOf(context).width >= 880;
 
-    final content = IndexedStack(
-      index: _index,
-      children: [
-        for (final d in _destinations)
-          Builder(key: ValueKey(d.label), builder: d.builder),
-      ],
-    );
+    return EditorScope(
+      controller: controller,
+      child: ListenableBuilder(
+        listenable: deps.navIndex,
+        builder: (context, _) {
+          final index = deps.navIndex.value.clamp(0, _destinations.length - 1);
 
-    final appBar = _ShellAppBar(
-      deps: deps,
-      title: _destinations[_index].label,
-      showLoadChip: _index != 0,
-    );
+          final content = IndexedStack(
+            index: index,
+            children: [
+              for (final d in _destinations)
+                Builder(key: ValueKey(d.label), builder: d.builder),
+            ],
+          );
 
-    final body = Scaffold(
-      appBar: appBar,
-      body: wide
-          ? Row(
-              children: [
-                ScrollConfiguration(
-                  behavior:
-                      ScrollConfiguration.of(context).copyWith(scrollbars: false),
-                  child: NavigationRail(
-                    selectedIndex: _index,
-                    onDestinationSelected: (i) => setState(() => _index = i),
-                    labelType: NavigationRailLabelType.all,
+          final appBar = _ShellAppBar(
+            deps: deps,
+            title: _destinations[index].label,
+            showLoadChip: index != 0,
+          );
+
+          final body = Scaffold(
+            appBar: appBar,
+            body: wide
+                ? Row(
+                    children: [
+                      ScrollConfiguration(
+                        behavior: ScrollConfiguration.of(context)
+                            .copyWith(scrollbars: false),
+                        child: NavigationRail(
+                          selectedIndex: index,
+                          // 导航与空态跳转共用 navIndex 单一数据源。
+                          onDestinationSelected: (i) => deps.navIndex.value = i,
+                          labelType: NavigationRailLabelType.all,
+                          destinations: [
+                            for (final d in _destinations)
+                              NavigationRailDestination(
+                                icon: Icon(d.icon),
+                                selectedIcon: Icon(d.selectedIcon),
+                                label: Text(d.label),
+                              ),
+                          ],
+                        ),
+                      ),
+                      VerticalDivider(width: 1, color: theme.dividerTheme.color),
+                      Expanded(child: content),
+                    ],
+                  )
+                : content,
+            bottomNavigationBar: wide
+                ? null
+                : NavigationBar(
+                    selectedIndex: index,
+                    onDestinationSelected: (i) => deps.navIndex.value = i,
                     destinations: [
                       for (final d in _destinations)
-                        NavigationRailDestination(
+                        NavigationDestination(
                           icon: Icon(d.icon),
                           selectedIcon: Icon(d.selectedIcon),
-                          label: Text(d.label),
+                          label: d.label,
                         ),
                     ],
                   ),
-                ),
-                VerticalDivider(width: 1, color: theme.dividerTheme.color),
-                Expanded(child: content),
-              ],
-            )
-          : content,
-      bottomNavigationBar: wide
-          ? null
-          : NavigationBar(
-              selectedIndex: _index,
-              onDestinationSelected: (i) => setState(() => _index = i),
-              destinations: [
-                for (final d in _destinations)
-                  NavigationDestination(
-                    icon: Icon(d.icon),
-                    selectedIcon: Icon(d.selectedIcon),
-                    label: d.label,
-                  ),
-              ],
-            ),
+          );
+          return body;
+        },
+      ),
     );
-
-    return EditorScope(controller: controller, child: body);
   }
 }
 

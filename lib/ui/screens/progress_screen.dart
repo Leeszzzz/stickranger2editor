@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../main.dart';
 import '../../models/game_data.dart';
+import '../../models/icon_assets.dart';
 import '../../state/editor_controller.dart';
 import '../widgets/common.dart';
 
@@ -276,9 +277,10 @@ class _AchievementStageGroup extends StatelessWidget {
                 subtitle: catalog.achievementDef(id).subtitle.isEmpty
                     ? null
                     : Text(catalog.achievementDef(id).subtitle),
-                secondary: InfoBadge(
-                  '目标 ${catalog.achievementDef(id).targetValue}',
-                  color: theme.colorScheme.tertiary,
+                secondary: _AchievementLeading(
+                  iconId: catalog.achievementDef(id).iconId,
+                  targetValue: catalog.achievementDef(id).targetValue,
+                  completed: controller.achievementCompleted(id),
                 ),
                 value: controller.achievementCompleted(id),
                 onChanged: (v) => controller.setAchievementCompleted(id, v ?? false),
@@ -291,6 +293,54 @@ class _AchievementStageGroup extends StatelessWidget {
 }
 
 // ==================== 勋章 ====================
+
+/// 成就行首：原版奖章图标（medal.png，索引 = v[][3]）+ 目标值徽章。
+/// 游戏逻辑：未完成的奖章整体乘 0x444444 变暗。
+class _AchievementLeading extends StatelessWidget {
+  const _AchievementLeading({
+    required this.iconId,
+    required this.targetValue,
+    required this.completed,
+  });
+
+  final int iconId;
+  final int targetValue;
+  final bool completed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final hasMedal = kAvailableMedalIcons.contains(iconId);
+    Widget? medal;
+    if (hasMedal) {
+      medal = Image.asset(
+        medalAssetPath(iconId),
+        width: 22,
+        height: 22,
+        filterQuality: FilterQuality.none,
+      );
+      if (!completed) {
+        medal = ColorFiltered(
+          colorFilter: const ColorFilter.mode(
+            Color(0xFF444444),
+            BlendMode.modulate,
+          ),
+          child: medal,
+        );
+      }
+    }
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (medal != null) ...[
+          medal,
+          const SizedBox(width: 6),
+        ],
+        InfoBadge('目标 $targetValue', color: theme.colorScheme.tertiary),
+      ],
+    );
+  }
+}
 
 class _MedalsTab extends StatelessWidget {
   const _MedalsTab();
@@ -392,8 +442,13 @@ class _OnigiriTab extends StatelessWidget {
       children: [
         SectionCard(
           title: '饭团数量',
-          icon: Icons.rice_bowl_rounded,
           subtitle: '回血道具的持有数量',
+          iconWidget: Image.asset(
+            'assets/icons/onigiri.png',
+            width: 22,
+            height: 22,
+            filterQuality: FilterQuality.none,
+          ),
           child: NumberField(
             label: '饭团数量',
             value: controller.usedSp,
@@ -451,10 +506,10 @@ class _MonsterTab extends StatelessWidget {
           child: GridView.builder(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 220,
+              maxCrossAxisExtent: 200,
               mainAxisSpacing: 8,
               crossAxisSpacing: 8,
-              childAspectRatio: 2.6,
+              childAspectRatio: 0.88,
             ),
             itemCount: 128,
             itemBuilder: (context, i) => _MonsterTile(index: i),
@@ -475,16 +530,43 @@ class _MonsterTile extends StatelessWidget {
     final theme = Theme.of(context);
     final controller = EditorScope.watch(context);
     final state = controller.monsterState(index);
+    final face = controller.catalog.monsterFace(index);
+    final faceAsset =
+        face != null && kAvailableEnemyFaces.contains(face) ? face : null;
+    // 脸谱按怪物主色（H[i][6]）乘法染色，与游戏内绘制一致。
+    final faceColor = controller.catalog.monsterColor(index);
 
     return Card(
       margin: EdgeInsets.zero,
       color: state == 0 ? theme.colorScheme.surfaceContainerHigh : null,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            SizedBox(
+              height: 68,
+              child: faceAsset == null
+                  ? Icon(
+                      Icons.pets_rounded,
+                      size: 40,
+                      color: theme.colorScheme.outlineVariant,
+                    )
+                  : Center(
+                      child: Image.asset(
+                        enemyAssetPath(faceAsset),
+                        width: 96,
+                        height: 96,
+                        filterQuality: FilterQuality.none,
+                        color: faceColor != null
+                            ? Color(0xFF000000 | faceColor)
+                            : null,
+                        colorBlendMode:
+                            faceColor != null ? BlendMode.modulate : null,
+                      ),
+                    ),
+            ),
+            const SizedBox(height: 8),
             Text(
               '怪物 #${index.toString().padLeft(3, '0')}',
               style: theme.textTheme.labelMedium?.copyWith(
@@ -493,28 +575,34 @@ class _MonsterTile extends StatelessWidget {
                 color: state == 0 ? theme.colorScheme.outline : null,
               ),
             ),
-            const SizedBox(height: 4),
-            SizedBox(
-              height: 26,
-              child: SegmentedButton<int>(
-                showSelectedIcon: false,
-                style: ButtonStyle(
-                  visualDensity: VisualDensity.compact,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  side: WidgetStatePropertyAll(
-                    BorderSide(
-                      color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+            const SizedBox(height: 8),
+            // 游戏内图鉴按金币逐步解锁：1 级=遇见、2 级=查看数据、3 级=完全查看。
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final (value, label) in const [
+                  (0, '怪物信息1级'),
+                  (1, '怪物信息2级'),
+                  (2, '怪物信息3级'),
+                ])
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: ChoiceChip(
+                      label: Text(
+                        label,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          overflow: TextOverflow.visible,
+                        ),
+                      ),
+                      labelPadding: const EdgeInsets.symmetric(horizontal: 4),
+                      selected: state == value,
+                      visualDensity: VisualDensity.compact,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      onSelected: (_) => controller.setMonsterState(index, value),
                     ),
                   ),
-                ),
-                segments: const [
-                  ButtonSegment(value: 0, label: Text('未遇', style: TextStyle(fontSize: 11))),
-                  ButtonSegment(value: 1, label: Text('遇见', style: TextStyle(fontSize: 11))),
-                  ButtonSegment(value: 2, label: Text('查看', style: TextStyle(fontSize: 11))),
-                ],
-                selected: {state},
-                onSelectionChanged: (s) => controller.setMonsterState(index, s.first),
-              ),
+              ],
             ),
           ],
         ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:url_launcher/url_launcher.dart';
+
+import '../../services/open_external.dart';
+
 
 import '../../main.dart';
 import '../../models/game_data.dart';
@@ -79,14 +81,9 @@ class _DataScreenState extends State<DataScreen> {
   }
 
   Future<void> _launchBilibili(BuildContext context) async {
-    final uri = Uri.parse('https://space.bilibili.com/622550948');
-    try {
-      final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
-      if (!ok && context.mounted) {
-        showAppSnackBar(context, '无法打开浏览器链接', error: true);
-      }
-    } catch (_) {
-      if (context.mounted) showAppSnackBar(context, '无法打开浏览器链接', error: true);
+    final ok = await openExternal('https://space.bilibili.com/622550948');
+    if (!ok && context.mounted) {
+      showAppSnackBar(context, '无法打开浏览器链接，请检查弹窗拦截设置', error: true);
     }
   }
 
@@ -239,18 +236,22 @@ class _DataScreenState extends State<DataScreen> {
                         ),
                       ),
                       Flexible(
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(6),
+                        child: Semantics(
+                          link: true,
                           onTap: () => _launchBilibili(context),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 2),
-                            child: Text(
-                              'space.bilibili.com/622550948',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.primary,
-                                decoration: TextDecoration.underline,
-                                decorationColor:
-                                    theme.colorScheme.primary.withValues(alpha: 0.5),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(6),
+                            onTap: () => _launchBilibili(context),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 2),
+                              child: Text(
+                                'space.bilibili.com/622550948',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  decoration: TextDecoration.underline,
+                                  decorationColor: theme.colorScheme.primary
+                                      .withValues(alpha: 0.5),
+                                ),
                               ),
                             ),
                           ),

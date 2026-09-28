@@ -1,223 +1,1056 @@
 {
-  "stages": [
-    {
-      "id": 0,
-      "name": "",
-      "area": 0
-    },
-    {
-      "id": 1,
-      "name": "Village",
-      "area": 0
-    },
-    {
-      "id": 2,
-      "name": "Cave 1",
-      "area": 0
-    },
-    {
-      "id": 3,
-      "name": "Cave 2",
-      "area": 0
-    },
-    {
-      "id": 4,
-      "name": "Cave 3",
-      "area": 0
-    },
-    {
-      "id": 5,
-      "name": "Cave 4",
-      "area": 0
-    },
-    {
-      "id": 6,
-      "name": "Central cavity",
-      "area": 0
-    },
-    {
-      "id": 7,
-      "name": "Terraced cave",
-      "area": 0
-    },
-    {
-      "id": 8,
-      "name": "Sky garden",
-      "area": 1
-    },
-    {
-      "id": 9,
-      "name": "Sky garden 2",
-      "area": 1
-    },
-    {
-      "id": 10,
-      "name": "Sky garden 3",
-      "area": 1
-    },
-    {
-      "id": 11,
-      "name": "Upper cave",
-      "area": 1
-    },
-    {
-      "id": 12,
-      "name": "Terrace",
-      "area": 1
-    },
-    {
-      "id": 13,
-      "name": "Limestone cave 1",
-      "area": 2
-    },
-    {
-      "id": 14,
-      "name": "Limestone cave 2",
-      "area": 2
-    },
-    {
-      "id": 15,
-      "name": "Limestone cave 3",
-      "area": 2
-    },
-    {
-      "id": 16,
-      "name": "Limestone cave 4",
-      "area": 2
-    },
-    {
-      "id": 17,
-      "name": "Limestone cave 5",
-      "area": 2
-    },
-    {
-      "id": 18,
-      "name": "Limestone cave 6",
-      "area": 2
-    },
-    {
-      "id": 19,
-      "name": "Limestone cave 7",
-      "area": 2
-    },
-    {
-      "id": 20,
-      "name": "Limestone cave 8",
-      "area": 2
-    },
-    {
-      "id": 21,
-      "name": "Snow field 1",
-      "area": 3
-    }
-  ],
-  "achievements": [],
-  "medals": [
-    {
-      "name": "Gold Shower",
-      "value": 15
-    },
-    {
-      "name": "Clear Status",
-      "value": 30
-    },
-    {
-      "name": "ONIGIRI",
-      "value": 45
-    },
-    {
-      "name": "Level Up",
-      "value": 60
-    },
-    {
-      "name": "Warp Zone",
-      "value": 75
-    }
-  ],
-  "stage_medal_items": {
-    "2": {
-      "item_id": 72,
-      "name": "Craft Amulet"
-    },
-    "3": {
-      "item_id": 74,
-      "name": "Shell Amulet"
-    },
-    "4": {
-      "item_id": 76,
-      "name": "Elf Amulet"
-    },
-    "5": {
-      "item_id": 78,
-      "name": "Crystal Amulet"
-    },
-    "7": {
-      "item_id": 80,
-      "name": "Bandit Amulet"
-    },
-    "8": {
-      "item_id": 82,
-      "name": "Amethyst Amulet"
-    },
-    "9": {
-      "item_id": 84,
-      "name": "Platinum Amulet"
-    },
-    "10": {
-      "item_id": 86,
-      "name": "Citrine Amulet"
-    },
-    "11": {
-      "item_id": 88,
-      "name": "Sapphire Amulet"
-    },
-    "13": {
-      "item_id": 114,
-      "name": ""
-    },
-    "14": {
-      "item_id": 116,
-      "name": "Peridot Amulet"
-    },
-    "15": {
-      "item_id": 118,
-      "name": "Ammolite Amulet"
-    },
-    "16": {
-      "item_id": 120,
-      "name": "Warrior Amulet"
-    },
-    "17": {
-      "item_id": 139,
-      "name": "Giant Amulet"
-    },
-    "18": {
-      "item_id": 140,
-      "name": "Moon Amulet"
-    },
-    "19": {
-      "item_id": 141,
-      "name": "Fire Charm"
-    }
+ "stages": [
+  {
+   "id": 0,
+   "name": "",
+   "area": 0
   },
-  "achievement_groups": [
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    []
-  ]
+  {
+   "id": 1,
+   "name": "Village",
+   "area": 0
+  },
+  {
+   "id": 2,
+   "name": "Cave 1",
+   "area": 0
+  },
+  {
+   "id": 3,
+   "name": "Cave 2",
+   "area": 0
+  },
+  {
+   "id": 4,
+   "name": "Cave 3",
+   "area": 0
+  },
+  {
+   "id": 5,
+   "name": "Cave 4",
+   "area": 0
+  },
+  {
+   "id": 6,
+   "name": "Central cavity",
+   "area": 0
+  },
+  {
+   "id": 7,
+   "name": "Terraced cave",
+   "area": 0
+  },
+  {
+   "id": 8,
+   "name": "Sky garden",
+   "area": 1
+  },
+  {
+   "id": 9,
+   "name": "Sky garden 2",
+   "area": 1
+  },
+  {
+   "id": 10,
+   "name": "Sky garden 3",
+   "area": 1
+  },
+  {
+   "id": 11,
+   "name": "Upper cave",
+   "area": 1
+  },
+  {
+   "id": 12,
+   "name": "Terrace",
+   "area": 1
+  },
+  {
+   "id": 13,
+   "name": "Limestone cave 1",
+   "area": 2
+  },
+  {
+   "id": 14,
+   "name": "Limestone cave 2",
+   "area": 2
+  },
+  {
+   "id": 15,
+   "name": "Limestone cave 3",
+   "area": 2
+  },
+  {
+   "id": 16,
+   "name": "Limestone cave 4",
+   "area": 2
+  },
+  {
+   "id": 17,
+   "name": "Limestone cave 5",
+   "area": 2
+  },
+  {
+   "id": 18,
+   "name": "Limestone cave 6",
+   "area": 2
+  },
+  {
+   "id": 19,
+   "name": "Limestone cave 7",
+   "area": 2
+  },
+  {
+   "id": 20,
+   "name": "Limestone cave 8",
+   "area": 2
+  },
+  {
+   "id": 21,
+   "name": "Snow field 1",
+   "area": 3
+  }
+ ],
+ "achievements": [
+  {
+   "id": 0,
+   "name": "Stage clear",
+   "subtitle": "",
+   "stage_id": 2,
+   "icon_id": 0,
+   "target_value": 1
+  },
+  {
+   "id": 1,
+   "name": "Combo 100",
+   "subtitle": "",
+   "stage_id": 2,
+   "icon_id": 1,
+   "target_value": 1
+  },
+  {
+   "id": 2,
+   "name": "Giant green slime hunt 10",
+   "subtitle": "",
+   "stage_id": 2,
+   "icon_id": 2,
+   "target_value": 10
+  },
+  {
+   "id": 3,
+   "name": "Mining 20 gold ores",
+   "subtitle": "",
+   "stage_id": 2,
+   "icon_id": 3,
+   "target_value": 20
+  },
+  {
+   "id": 4,
+   "name": "Stickman",
+   "subtitle": "",
+   "stage_id": 2,
+   "icon_id": 4,
+   "target_value": 5
+  },
+  {
+   "id": 5,
+   "name": "Giant green worm",
+   "subtitle": "hunt 30",
+   "stage_id": 3,
+   "icon_id": 5,
+   "target_value": 30
+  },
+  {
+   "id": 6,
+   "name": "Pass through (undamaged)",
+   "subtitle": "",
+   "stage_id": 3,
+   "icon_id": 6,
+   "target_value": 1
+  },
+  {
+   "id": 7,
+   "name": "Two small rooms",
+   "subtitle": "",
+   "stage_id": 3,
+   "icon_id": 7,
+   "target_value": 1
+  },
+  {
+   "id": 8,
+   "name": "Defeat Giant Yellow Slime",
+   "subtitle": "within 30 sec",
+   "stage_id": 3,
+   "icon_id": 2,
+   "target_value": 1
+  },
+  {
+   "id": 9,
+   "name": "Defeat Giant Red Slime",
+   "subtitle": "within 10 sec",
+   "stage_id": 3,
+   "icon_id": 8,
+   "target_value": 1
+  },
+  {
+   "id": 10,
+   "name": "Stage clear",
+   "subtitle": "within 60 sec",
+   "stage_id": 4,
+   "icon_id": 0,
+   "target_value": 1
+  },
+  {
+   "id": 11,
+   "name": "Defeat Dark Green Slime",
+   "subtitle": "with a physical attack",
+   "stage_id": 4,
+   "icon_id": 2,
+   "target_value": 1
+  },
+  {
+   "id": 12,
+   "name": "Defeat only",
+   "subtitle": "Pink Tree Head",
+   "stage_id": 4,
+   "icon_id": 9,
+   "target_value": 1
+  },
+  {
+   "id": 13,
+   "name": "Defeat boss unhurt",
+   "subtitle": "",
+   "stage_id": 4,
+   "icon_id": 10,
+   "target_value": 1
+  },
+  {
+   "id": 14,
+   "name": "Came from upper layer",
+   "subtitle": "",
+   "stage_id": 4,
+   "icon_id": 11,
+   "target_value": 1
+  },
+  {
+   "id": 15,
+   "name": "Stage clear",
+   "subtitle": "without healing",
+   "stage_id": 5,
+   "icon_id": 0,
+   "target_value": 1
+  },
+  {
+   "id": 16,
+   "name": "Defeat all fish",
+   "subtitle": "without diving",
+   "stage_id": 5,
+   "icon_id": 12,
+   "target_value": 1
+  },
+  {
+   "id": 17,
+   "name": "Defeat all fish",
+   "subtitle": "without landing",
+   "stage_id": 5,
+   "icon_id": 12,
+   "target_value": 1
+  },
+  {
+   "id": 18,
+   "name": "Defeat Giant Fish",
+   "subtitle": "within 20 sec",
+   "stage_id": 5,
+   "icon_id": 12,
+   "target_value": 1
+  },
+  {
+   "id": 19,
+   "name": "Stickman's enter",
+   "subtitle": "small room",
+   "stage_id": 5,
+   "icon_id": 7,
+   "target_value": 1
+  },
+  {
+   "id": 20,
+   "name": "Stage clear & Combo 87",
+   "subtitle": "",
+   "stage_id": 7,
+   "icon_id": 0,
+   "target_value": 1
+  },
+  {
+   "id": 21,
+   "name": "Defeat boss unhurt",
+   "subtitle": "",
+   "stage_id": 7,
+   "icon_id": 13,
+   "target_value": 1
+  },
+  {
+   "id": 22,
+   "name": "Doll hunt 50",
+   "subtitle": "",
+   "stage_id": 7,
+   "icon_id": 14,
+   "target_value": 50
+  },
+  {
+   "id": 23,
+   "name": "Everyone freezes",
+   "subtitle": "",
+   "stage_id": 7,
+   "icon_id": 15,
+   "target_value": 1
+  },
+  {
+   "id": 24,
+   "name": "Pick up 225G",
+   "subtitle": "",
+   "stage_id": 7,
+   "icon_id": 3,
+   "target_value": 1
+  },
+  {
+   "id": 25,
+   "name": "Stage clear bonus 2.0",
+   "subtitle": "",
+   "stage_id": 8,
+   "icon_id": 0,
+   "target_value": 1
+  },
+  {
+   "id": 26,
+   "name": "Combo 300",
+   "subtitle": "",
+   "stage_id": 8,
+   "icon_id": 1,
+   "target_value": 1
+  },
+  {
+   "id": 27,
+   "name": "Defeat Tree Head",
+   "subtitle": "with a sniper",
+   "stage_id": 8,
+   "icon_id": 9,
+   "target_value": 1
+  },
+  {
+   "id": 28,
+   "name": "Float for 5 sec",
+   "subtitle": "with everyone",
+   "stage_id": 8,
+   "icon_id": 16,
+   "target_value": 1
+  },
+  {
+   "id": 29,
+   "name": "50 lost money",
+   "subtitle": "",
+   "stage_id": 8,
+   "icon_id": 3,
+   "target_value": 50
+  },
+  {
+   "id": 30,
+   "name": "Stage clear & Combo 111",
+   "subtitle": "",
+   "stage_id": 9,
+   "icon_id": 0,
+   "target_value": 1
+  },
+  {
+   "id": 31,
+   "name": "Defeat boss",
+   "subtitle": "with an overkill",
+   "stage_id": 9,
+   "icon_id": 9,
+   "target_value": 1
+  },
+  {
+   "id": 32,
+   "name": "Over 100 enemies",
+   "subtitle": "",
+   "stage_id": 9,
+   "icon_id": 10,
+   "target_value": 1
+  },
+  {
+   "id": 33,
+   "name": "In the ladder",
+   "subtitle": "",
+   "stage_id": 9,
+   "icon_id": 17,
+   "target_value": 1
+  },
+  {
+   "id": 34,
+   "name": "Move from there?",
+   "subtitle": "",
+   "stage_id": 9,
+   "icon_id": 18,
+   "target_value": 1
+  },
+  {
+   "id": 35,
+   "name": "Stage clear",
+   "subtitle": "without healing",
+   "stage_id": 10,
+   "icon_id": 0,
+   "target_value": 1
+  },
+  {
+   "id": 36,
+   "name": "Combo 500",
+   "subtitle": "",
+   "stage_id": 10,
+   "icon_id": 1,
+   "target_value": 1
+  },
+  {
+   "id": 37,
+   "name": "Defeat only",
+   "subtitle": "Yellow Tree Head",
+   "stage_id": 10,
+   "icon_id": 9,
+   "target_value": 1
+  },
+  {
+   "id": 38,
+   "name": "Defeat Green Tree Head",
+   "subtitle": "unhurt",
+   "stage_id": 10,
+   "icon_id": 9,
+   "target_value": 1
+  },
+  {
+   "id": 39,
+   "name": "Everyone poison",
+   "subtitle": "",
+   "stage_id": 10,
+   "icon_id": 19,
+   "target_value": 1
+  },
+  {
+   "id": 40,
+   "name": "Stage clear",
+   "subtitle": "within 60 sec",
+   "stage_id": 11,
+   "icon_id": 0,
+   "target_value": 1
+  },
+  {
+   "id": 41,
+   "name": "Defeat Giant Green Slime",
+   "subtitle": "with a attribute attack",
+   "stage_id": 11,
+   "icon_id": 2,
+   "target_value": 1
+  },
+  {
+   "id": 42,
+   "name": "Defeat Black Tree Head",
+   "subtitle": "unhurt",
+   "stage_id": 11,
+   "icon_id": 9,
+   "target_value": 1
+  },
+  {
+   "id": 43,
+   "name": "Fire & ice & poison status",
+   "subtitle": "",
+   "stage_id": 11,
+   "icon_id": 20,
+   "target_value": 1
+  },
+  {
+   "id": 44,
+   "name": "Stickman",
+   "subtitle": "",
+   "stage_id": 11,
+   "icon_id": 4,
+   "target_value": 1
+  },
+  {
+   "id": 45,
+   "name": "Stage clear",
+   "subtitle": "within 120 sec",
+   "stage_id": 13,
+   "icon_id": 0,
+   "target_value": 1
+  },
+  {
+   "id": 46,
+   "name": "Defeat 90 Bats",
+   "subtitle": "",
+   "stage_id": 13,
+   "icon_id": 10,
+   "target_value": 1
+  },
+  {
+   "id": 47,
+   "name": "Slime hunt 20",
+   "subtitle": "",
+   "stage_id": 13,
+   "icon_id": 2,
+   "target_value": 20
+  },
+  {
+   "id": 48,
+   "name": "Defeat Giant Slime unhurt",
+   "subtitle": "",
+   "stage_id": 13,
+   "icon_id": 2,
+   "target_value": 1
+  },
+  {
+   "id": 49,
+   "name": "Defeat Giant Fish",
+   "subtitle": "within 25 sec",
+   "stage_id": 13,
+   "icon_id": 12,
+   "target_value": 1
+  },
+  {
+   "id": 50,
+   "name": "Stage clear",
+   "subtitle": "without healing",
+   "stage_id": 14,
+   "icon_id": 0,
+   "target_value": 1
+  },
+  {
+   "id": 51,
+   "name": "Pass through (undamaged)",
+   "subtitle": "",
+   "stage_id": 14,
+   "icon_id": 6,
+   "target_value": 1
+  },
+  {
+   "id": 52,
+   "name": "Tree Head hunt 20",
+   "subtitle": "",
+   "stage_id": 14,
+   "icon_id": 9,
+   "target_value": 20
+  },
+  {
+   "id": 53,
+   "name": "Float for 30 sec",
+   "subtitle": "with everyone",
+   "stage_id": 14,
+   "icon_id": 16,
+   "target_value": 1
+  },
+  {
+   "id": 54,
+   "name": "Golden Circle",
+   "subtitle": "",
+   "stage_id": 14,
+   "icon_id": 3,
+   "target_value": 1
+  },
+  {
+   "id": 55,
+   "name": "Stage clear & Combo 227",
+   "subtitle": "",
+   "stage_id": 15,
+   "icon_id": 0,
+   "target_value": 1
+  },
+  {
+   "id": 56,
+   "name": "Combo 600",
+   "subtitle": "",
+   "stage_id": 15,
+   "icon_id": 1,
+   "target_value": 1
+  },
+  {
+   "id": 57,
+   "name": "Defeat Tree Head unhurt",
+   "subtitle": "",
+   "stage_id": 15,
+   "icon_id": 13,
+   "target_value": 1
+  },
+  {
+   "id": 58,
+   "name": "Defeat Giant Black Slime",
+   "subtitle": "within 60 sec",
+   "stage_id": 15,
+   "icon_id": 2,
+   "target_value": 1
+  },
+  {
+   "id": 59,
+   "name": "Over 198 fish",
+   "subtitle": "",
+   "stage_id": 15,
+   "icon_id": 12,
+   "target_value": 1
+  },
+  {
+   "id": 60,
+   "name": "Stage clear",
+   "subtitle": "",
+   "stage_id": 16,
+   "icon_id": 0,
+   "target_value": 1
+  },
+  {
+   "id": 61,
+   "name": "Defeat boss",
+   "subtitle": "without healing",
+   "stage_id": 16,
+   "icon_id": 21,
+   "target_value": 1
+  },
+  {
+   "id": 62,
+   "name": "Defeat boss",
+   "subtitle": "without touching wall",
+   "stage_id": 16,
+   "icon_id": 21,
+   "target_value": 1
+  },
+  {
+   "id": 63,
+   "name": "Defeat Tree Head",
+   "subtitle": "with a sniper",
+   "stage_id": 16,
+   "icon_id": 9,
+   "target_value": 1
+  },
+  {
+   "id": 64,
+   "name": "100 Tropical Fish",
+   "subtitle": "",
+   "stage_id": 16,
+   "icon_id": 12,
+   "target_value": 1
+  },
+  {
+   "id": 65,
+   "name": "Stage clear",
+   "subtitle": "without healing",
+   "stage_id": 17,
+   "icon_id": 0,
+   "target_value": 1
+  },
+  {
+   "id": 66,
+   "name": "Defeat Slime avoid poison",
+   "subtitle": "",
+   "stage_id": 17,
+   "icon_id": 2,
+   "target_value": 1
+  },
+  {
+   "id": 67,
+   "name": "99 gold ores",
+   "subtitle": "",
+   "stage_id": 17,
+   "icon_id": 3,
+   "target_value": 1
+  },
+  {
+   "id": 68,
+   "name": "Defeat only",
+   "subtitle": "Giant Red Square",
+   "stage_id": 17,
+   "icon_id": 22,
+   "target_value": 1
+  },
+  {
+   "id": 69,
+   "name": "Sunflower hunt 50",
+   "subtitle": "",
+   "stage_id": 17,
+   "icon_id": 9,
+   "target_value": 50
+  },
+  {
+   "id": 70,
+   "name": "Stage clear",
+   "subtitle": "within 150 sec",
+   "stage_id": 18,
+   "icon_id": 0,
+   "target_value": 1
+  },
+  {
+   "id": 71,
+   "name": "Defeat all fish",
+   "subtitle": "without diving",
+   "stage_id": 18,
+   "icon_id": 12,
+   "target_value": 1
+  },
+  {
+   "id": 72,
+   "name": "Defeat all fish",
+   "subtitle": "without landing",
+   "stage_id": 18,
+   "icon_id": 12,
+   "target_value": 1
+  },
+  {
+   "id": 73,
+   "name": "3 lasers",
+   "subtitle": "",
+   "stage_id": 18,
+   "icon_id": 23,
+   "target_value": 1
+  },
+  {
+   "id": 74,
+   "name": "Pass through",
+   "subtitle": "(don't touch)",
+   "stage_id": 18,
+   "icon_id": 6,
+   "target_value": 1
+  },
+  {
+   "id": 75,
+   "name": "Stage clear & Combo 828",
+   "subtitle": "",
+   "stage_id": 19,
+   "icon_id": 0,
+   "target_value": 1
+  },
+  {
+   "id": 76,
+   "name": "Army of Dolls",
+   "subtitle": "",
+   "stage_id": 19,
+   "icon_id": 14,
+   "target_value": 1
+  },
+  {
+   "id": 77,
+   "name": "Defeat all dolls",
+   "subtitle": "(keep 30 or less)",
+   "stage_id": 19,
+   "icon_id": 14,
+   "target_value": 1
+  },
+  {
+   "id": 78,
+   "name": "Defeat Slime",
+   "subtitle": "without freezing",
+   "stage_id": 19,
+   "icon_id": 2,
+   "target_value": 1
+  },
+  {
+   "id": 79,
+   "name": "Stickman",
+   "subtitle": "",
+   "stage_id": 19,
+   "icon_id": 4,
+   "target_value": 1
+  }
+ ],
+ "medals": [
+  {
+   "name": "Gold Shower",
+   "value": 15
+  },
+  {
+   "name": "Clear Status",
+   "value": 30
+  },
+  {
+   "name": "ONIGIRI",
+   "value": 45
+  },
+  {
+   "name": "Level Up",
+   "value": 60
+  },
+  {
+   "name": "Warp Zone",
+   "value": 75
+  }
+ ],
+ "stage_medal_items": {
+  "2": {
+   "item_id": 72,
+   "name": "Craft Amulet"
+  },
+  "3": {
+   "item_id": 74,
+   "name": "Shell Amulet"
+  },
+  "4": {
+   "item_id": 76,
+   "name": "Elf Amulet"
+  },
+  "5": {
+   "item_id": 78,
+   "name": "Crystal Amulet"
+  },
+  "7": {
+   "item_id": 80,
+   "name": "Bandit Amulet"
+  },
+  "8": {
+   "item_id": 82,
+   "name": "Amethyst Amulet"
+  },
+  "9": {
+   "item_id": 84,
+   "name": "Platinum Amulet"
+  },
+  "10": {
+   "item_id": 86,
+   "name": "Citrine Amulet"
+  },
+  "11": {
+   "item_id": 88,
+   "name": "Sapphire Amulet"
+  },
+  "13": {
+   "item_id": 114,
+   "name": ""
+  },
+  "14": {
+   "item_id": 116,
+   "name": "Peridot Amulet"
+  },
+  "15": {
+   "item_id": 118,
+   "name": "Ammolite Amulet"
+  },
+  "16": {
+   "item_id": 120,
+   "name": "Warrior Amulet"
+  },
+  "17": {
+   "item_id": 139,
+   "name": "Giant Amulet"
+  },
+  "18": {
+   "item_id": 140,
+   "name": "Moon Amulet"
+  },
+  "19": {
+   "item_id": 141,
+   "name": "Fire Charm"
+  }
+ },
+ "monster_faces": {
+  "0": 0,
+  "1": 0,
+  "2": 0,
+  "3": 0,
+  "5": 0,
+  "4": 0,
+  "6": 4,
+  "7": 0,
+  "8": 0,
+  "9": 0,
+  "14": 0,
+  "15": 0,
+  "10": 2,
+  "11": 2,
+  "12": 0,
+  "13": 0,
+  "16": 0,
+  "17": 0,
+  "18": 0,
+  "19": 2,
+  "20": 0,
+  "21": 0,
+  "22": 0,
+  "23": 0,
+  "24": 0,
+  "25": 2,
+  "26": 2,
+  "27": 9,
+  "28": 0,
+  "29": 0,
+  "30": 6,
+  "31": 6,
+  "32": 0,
+  "33": 4,
+  "34": 0,
+  "35": 0,
+  "36": 19,
+  "37": 0,
+  "38": 3,
+  "39": 0,
+  "40": 4,
+  "41": 0,
+  "42": 0,
+  "43": 0,
+  "44": 0,
+  "45": 0,
+  "46": 6,
+  "47": 0,
+  "48": 0,
+  "49": 2,
+  "50": 0,
+  "51": 0,
+  "52": 0,
+  "53": 6,
+  "54": 6,
+  "55": 0,
+  "56": 4,
+  "57": 3,
+  "58": 6,
+  "59": 0,
+  "60": 0,
+  "61": 2,
+  "62": 4,
+  "63": 0,
+  "64": 0,
+  "65": 0,
+  "66": 0,
+  "67": 0,
+  "68": 0,
+  "69": 6,
+  "70": 20,
+  "71": 0,
+  "72": 3,
+  "73": 0,
+  "74": 0,
+  "75": 0,
+  "76": 0,
+  "77": 3,
+  "78": 0,
+  "79": 0,
+  "80": 10,
+  "81": 0,
+  "82": 0,
+  "83": 4,
+  "84": 0,
+  "85": 4,
+  "86": 0,
+  "87": 0,
+  "88": 12,
+  "89": 0,
+  "90": 0,
+  "91": 5,
+  "92": 0,
+  "93": 0,
+  "94": 0,
+  "95": 10,
+  "96": 10,
+  "97": 2,
+  "98": 3,
+  "99": 6,
+  "100": 0,
+  "101": 0,
+  "102": 0,
+  "103": 0
+ },
+ "monster_colors": {
+  "0": 3394611,
+  "1": 3394815,
+  "2": 13369344,
+  "3": 3394611,
+  "5": 13421772,
+  "4": 3394611,
+  "6": 0,
+  "7": 13421568,
+  "8": 13421568,
+  "9": 4482577,
+  "14": 13369344,
+  "15": 11141120,
+  "10": 6710937,
+  "11": 15623833,
+  "12": 3394611,
+  "13": 3394815,
+  "16": 13421772,
+  "17": 0,
+  "18": 35839,
+  "19": 10027059,
+  "20": 15645440,
+  "21": 6724095,
+  "22": 10079487,
+  "23": 39219,
+  "24": 15645440,
+  "25": 10066380,
+  "26": 16763904,
+  "27": 13421772,
+  "28": 13421772,
+  "29": 13421772,
+  "30": 10066380,
+  "31": 13395456,
+  "32": 13421772,
+  "33": 16750848,
+  "34": 2236962,
+  "35": 4204560,
+  "36": 16750848,
+  "37": 13421772,
+  "38": 16763904,
+  "39": 0,
+  "40": 52224,
+  "41": 2245632,
+  "42": 13421772,
+  "43": 12259584,
+  "44": 11184810,
+  "45": 1118481,
+  "46": 0,
+  "47": 6724095,
+  "48": 4204560,
+  "49": 6710784,
+  "50": 16750848,
+  "51": 26316,
+  "52": 16750848,
+  "53": 16764006,
+  "54": 16764006,
+  "55": 3394611,
+  "56": 16764057,
+  "57": 16751052,
+  "58": 10079487,
+  "59": 16763904,
+  "60": 39219,
+  "61": 10066329,
+  "62": 13408512,
+  "63": 5592405,
+  "64": 15601920,
+  "65": 6724095,
+  "66": 10066329,
+  "67": 15597738,
+  "68": 4491519,
+  "69": 10053273,
+  "70": 10066329,
+  "71": 3381555,
+  "72": 16763904,
+  "73": 10066329,
+  "74": 6710784,
+  "75": 6684672,
+  "76": 21913,
+  "77": 13421568,
+  "78": 13408614,
+  "79": 6697728,
+  "80": 13421568,
+  "81": 6724095,
+  "82": 13421568,
+  "83": 52224,
+  "84": 6697728,
+  "85": 5574929,
+  "86": 10079436,
+  "87": 10040064,
+  "88": 13408512,
+  "89": 6697728,
+  "90": 13408614,
+  "91": 3368550,
+  "92": 26112,
+  "93": 21913,
+  "94": 21913,
+  "95": 16750848,
+  "96": 52479,
+  "97": 6710937,
+  "98": 11059400,
+  "99": 13408665,
+  "100": 15266040,
+  "101": 15266040,
+  "102": 6710937,
+  "103": 6710937
+ }
 }

@@ -97,12 +97,16 @@ class SectionCard extends StatelessWidget {
     required this.title,
     required this.child,
     this.icon,
+    this.iconWidget,
     this.trailing,
     this.subtitle,
   });
 
   final String title;
   final IconData? icon;
+
+  /// 自定义标题图标（如像素 sprite），优先于 [icon]。
+  final Widget? iconWidget;
   final String? subtitle;
   final Widget? trailing;
   final Widget child;
@@ -118,7 +122,10 @@ class SectionCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                if (icon != null) ...[
+                if (iconWidget != null) ...[
+                  iconWidget!,
+                  const SizedBox(width: 8),
+                ] else if (icon != null) ...[
                   Icon(icon, size: 18, color: theme.colorScheme.primary),
                   const SizedBox(width: 8),
                 ],

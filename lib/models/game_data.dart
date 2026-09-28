@@ -178,17 +178,27 @@ class GameCatalog {
     required List<MedalDef> medals,
     required Map<int, StageMedalItem> stageMedalItems,
     required this.sourceLabel,
+    Map<int, int> monsterFaces = const {},
+    Map<int, int> monsterColors = const {},
   })  : _items = items,
         _stages = stages,
         _achievements = achievements,
         _medals = medals,
-        _stageMedalItems = stageMedalItems;
+        _stageMedalItems = stageMedalItems,
+        _monsterFaces = monsterFaces,
+        _monsterColors = monsterColors;
 
   final Map<int, ItemStats> _items;
   final Map<int, StageDef> _stages;
   final Map<int, AchievementDef> _achievements;
   final List<MedalDef> _medals;
   final Map<int, StageMedalItem> _stageMedalItems;
+
+  /// 怪物 id → en.png 脸谱索引（字段 H[i][2]）。
+  final Map<int, int> _monsterFaces;
+
+  /// 怪物 id → 主色（字段 H[i][6]，0xRRGGBB，用于脸谱染色）。
+  final Map<int, int> _monsterColors;
   final String sourceLabel;
 
   Map<int, ItemStats> get items => _items;
@@ -196,6 +206,10 @@ class GameCatalog {
   Map<int, AchievementDef> get achievements => _achievements;
   List<MedalDef> get medals => _medals;
   Map<int, StageMedalItem> get stageMedalItems => _stageMedalItems;
+
+  int? monsterFace(int monsterId) => _monsterFaces[monsterId];
+
+  int? monsterColor(int monsterId) => _monsterColors[monsterId];
 
   int get itemCount => _items.length;
   int get achievementCount => _achievements.values
@@ -394,6 +408,18 @@ class GameCatalog {
       medals: medals,
       stageMedalItems: stageMedalItems,
       sourceLabel: sourceLabel,
+      monsterFaces: {
+        for (final e in (achRaw['monster_faces'] as Map<String, dynamic>? ?? {})
+            .entries)
+          if (int.tryParse(e.key) case final id?)
+            if (e.value is num) id: (e.value as num).toInt(),
+      },
+      monsterColors: {
+        for (final e in (achRaw['monster_colors'] as Map<String, dynamic>? ?? {})
+            .entries)
+          if (int.tryParse(e.key) case final id?)
+            if (e.value is num) id: (e.value as num).toInt(),
+      },
     );
   }
 

@@ -202,12 +202,14 @@ Map<int, List<dynamic>> _extractRArray(String js) {
   return items;
 }
 
-List<List<dynamic>> _extractVArray(String js) {
-  final start = js.indexOf('v[0]=');
+/// 成就定义数组：压缩版 JS 中为 `w`（旧脚本误查 `v` 导致成就一直为空）。
+List<List<dynamic>> _extractAchievements(String js) {
+  var start = js.indexOf('w[0]=');
+  if (start < 0) start = js.indexOf('v[0]=');
   if (start < 0) return [];
   final section = js.substring(start);
   final found = <int, List<dynamic>>{};
-  final regex = RegExp(r'v\[(\d+)]\s*=');
+  final regex = RegExp(r'[wv]\[(\d+)\]\s*=');
   for (final match in regex.allMatches(section)) {
     final idx = int.parse(match.group(1)!);
     var pos = match.end;
@@ -225,6 +227,38 @@ List<List<dynamic>> _extractVArray(String js) {
   }
   final keys = found.keys.toList()..sort();
   return [for (final k in keys) found[k]!];
+}
+
+/// 怪物数据：脸谱 = H[i][2]（en.png 索引），主色 = H[i][6]（0xRRGGBB，用于染色）。
+Map<int, Map<String, int>> _extractMonsterData(String js) {
+  final start = js.indexOf('H[0]=');
+  if (start < 0) return {};
+  final section = js.substring(start);
+  final out = <int, Map<String, int>>{};
+  final regex = RegExp(r'H\[(\d+)\]\s*=');
+  for (final match in regex.allMatches(section)) {
+    final idx = int.parse(match.group(1)!);
+    final b = section.indexOf('[', match.end - 1);
+    if (b < 0) continue;
+    final (arrStr, _) = _extractBracket(section, b);
+    if (arrStr == null) continue;
+    try {
+      final arr = _parseSimpleJson(arrStr);
+      if (arr.length > 2 && arr[2] is num) {
+        out[idx] = {
+          'face': ((arr[2] as num).toInt()).clamp(0, 31),
+        };
+      }
+      if (arr.length > 6 && arr[6] is num) {
+        final c = (arr[6] as num).toInt();
+        if (c >= 0 && c <= 0xFFFFFF) {
+          out[idx] ??= {};
+          out[idx]!['color'] = c;
+        }
+      }
+    } catch (_) {}
+  }
+  return out;
 }
 
 List<(int, String, int)> _extractGArray(String js) {
@@ -333,7 +367,7 @@ DataUpdateResult? parseGameJs(String js) {
     };
   }
 
-  final achievements = _extractVArray(js);
+  final achievements = _extractAchievements(js);
   final achList = <Map<String, dynamic>>[];
   for (var i = 0; i < achievements.length; i++) {
     final arr = achievements[i];
@@ -375,11 +409,20 @@ DataUpdateResult? parseGameJs(String js) {
 
   final itemStatsJson =
       const JsonEncoder.withIndent('  ').convert(parsedItems);
+  final monsterData = _extractMonsterData(js);
+
   final achievementDataJson = const JsonEncoder.withIndent('  ').convert({
     'stages': stageList,
     'achievements': achList,
     'medals': medals,
     'stage_medal_items': stageMedalItems,
+    'monster_faces': {
+      for (final e in monsterData.entries) '${e.key}': e.value['face'] ?? 0,
+    },
+    'monster_colors': {
+      for (final e in monsterData.entries)
+        if (e.value['color'] != null) '${e.key}': e.value['color'],
+    },
     'achievement_groups': [
       for (var g = 0; g < 18; g++)
         [
