@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -22,6 +23,27 @@ class _DataScreenState extends State<DataScreen> {
   bool _updating = false;
 
   Future<void> _updateFromOfficial() async {
+    // 浏览器 CORS 限制导致 web 端无法直读 dan-ball.jp 响应，直接引导使用客户端。
+    if (kIsWeb) {
+      await showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          icon: const Icon(Icons.info_outline_rounded),
+          title: const Text('web端暂不支持此功能'),
+          content: const Text(
+            '浏览器安全策略（CORS）禁止网页直接读取官网数据。\n'
+            '请下载安装 Windows 或 Android 客户端使用数据更新功能。',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('知道了'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
     final deps = AppDeps.of(context);
     final controller = deps.controller;
     setState(() => _updating = true);
