@@ -3,7 +3,10 @@ import 'package:flutter/services.dart';
 
 import '../../main.dart';
 import '../../state/editor_controller.dart';
+import '../../theme/pixel_theme.dart';
 import '../widgets/common.dart';
+import '../widgets/pixel_icons.dart';
+import '../widgets/pixel_kit.dart';
 
 /// 与仓库 ranger2_decoder.py 内置示例一致的测试存档。
 const kSampleSave =
@@ -58,283 +61,480 @@ class _SaveScreenState extends State<SaveScreen> {
       _output.text = s;
       _exported = true;
     });
+    showAppSnackBar(context, '已生成新存档');
   }
 
   @override
   Widget build(BuildContext context) {
     final controller = EditorScope.watch(context);
-    final theme = Theme.of(context);
-
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 760),
+        constraints: const BoxConstraints(maxWidth: PixelLayout.contentMax),
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
+          padding: const EdgeInsets.fromLTRB(20, 20, 24, 40),
           children: [
-            _HeroCard(controller: controller),
-            const SizedBox(height: 12),
-            SectionCard(
-              title: '导入存档',
-              icon: Icons.download_rounded,
-              subtitle: '在游戏中点击 EXPORT 复制存档字符串，粘贴到下方后解析',
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextField(
-                    controller: _input,
-                    maxLines: 5,
-                    style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
-                    decoration: const InputDecoration(
-                      hintText: '粘贴 .rng2 存档字符串…',
-                      alignLabelWithHint: true,
-                    ),
-                    onChanged: (_) => setState(() => _error = null),
-                  ),
-                  if (_error != null) ...[
-                    const SizedBox(height: 10),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.errorContainer,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.error_outline,
-                              color: theme.colorScheme.onErrorContainer, size: 18),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              _error!,
-                              style: TextStyle(
-                                  color: theme.colorScheme.onErrorContainer),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      OutlinedButton.icon(
-                        onPressed: _paste,
-                        icon: const Icon(Icons.content_paste, size: 18),
-                        label: const Text('粘贴'),
-                      ),
-                      OutlinedButton.icon(
-                        onPressed: () => setState(() => _input.text = kSampleSave),
-                        icon: const Icon(Icons.auto_awesome, size: 18),
-                        label: const Text('示例存档'),
-                      ),
-                      FilledButton.icon(
-                        onPressed: () => _decode(controller),
-                        icon: const Icon(Icons.lock_open_rounded, size: 18),
-                        label: const Text('解析存档'),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+            WikiPageHeader(
+              title: '存档工坊',
+              breadcrumb: const ['SR2 EDITOR', '存档工坊'],
+              icon: PixelIcons.save,
+              subtitle:
+                  '导入、修改并重新编码 Stick Ranger 2 的存档字符串。'
+                  '解码会校验尾部校验和与数据校验和，导出时自动重算。',
+              tags: const [
+                PixelBadge('离线解码', tone: PixelBadgeTone.success, dot: true),
+                PixelBadge('768 个 6-bit 值', tone: PixelBadgeTone.neutral),
+                PixelBadge('重编码导出', tone: PixelBadgeTone.gold),
+              ],
             ),
-            const SizedBox(height: 12),
-            _StatusCard(controller: controller),
-            const SizedBox(height: 12),
-            SectionCard(
-              title: '导出存档',
-              icon: Icons.ios_share_rounded,
-              subtitle: '编码使用随机盐，同一状态每次生成的密文不同，游戏均可正常识别',
-              trailing: FilledButton.icon(
-                onPressed: controller.hasSave ? () => _export(controller) : null,
-                icon: const Icon(Icons.enhanced_encryption_rounded, size: 18),
-                label: const Text('生成新存档'),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextField(
-                    controller: _output,
-                    maxLines: 4,
-                    readOnly: true,
-                    style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
-                    decoration: const InputDecoration(
-                      hintText: '生成的新存档字符串将显示在这里…',
+            _StatusStrip(controller: controller, onUnload: _unload),
+            const SizedBox(height: 16),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final wide = constraints.maxWidth >= 880;
+                final left = Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _ImportPanel(
+                      controller: controller,
+                      input: _input,
+                      error: _error,
+                      onClearError: () => setState(() => _error = null),
+                      onPaste: _paste,
+                      onSample: () => setState(() => _input.text = kSampleSave),
+                      onDecode: () => _decode(controller),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    alignment: WrapAlignment.end,
-                    children: [
-                      OutlinedButton.icon(
-                        onPressed: _output.text.isEmpty
-                            ? null
-                            : () async {
-                                await Clipboard.setData(
-                                    ClipboardData(text: _output.text));
-                                if (context.mounted) {
-                                  showAppSnackBar(context, '已复制到剪贴板，回游戏 IMPORT 即可');
-                                }
-                              },
-                        icon: const Icon(Icons.copy_rounded, size: 18),
-                        label: const Text('复制到剪贴板'),
-                      ),
-                    ],
-                  ),
-                  if (_exported) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      '⚠ 修改存档前请务必备份原始字符串，编辑风险自负。',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
+                    const SizedBox(height: 16),
+                    _ExportPanel(
+                      controller: controller,
+                      output: _output,
+                      exported: _exported,
+                      onExport: () => _export(controller),
                     ),
                   ],
-                ],
-              ),
+                );
+                final right = Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _ArchiveInfobox(controller: controller),
+                    const SizedBox(height: 16),
+                    const _GuidePanel(),
+                  ],
+                );
+                if (!wide) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [left, const SizedBox(height: 16), right],
+                  );
+                }
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(flex: 7, child: left),
+                    const SizedBox(width: 16),
+                    SizedBox(width: 300, child: right),
+                  ],
+                );
+              },
             ),
           ],
         ),
       ),
     );
   }
-}
 
-class _HeroCard extends StatelessWidget {
-  const _HeroCard({required this.controller});
-
-  final EditorController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Card(
-      color: theme.colorScheme.primaryContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          children: [
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(Icons.terrain_rounded,
-                  size: 30, color: theme.colorScheme.onPrimaryContainer),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Stick Ranger 2 存档编辑器',
-                    style: theme.textTheme.titleLarge
-                        ?.copyWith(fontWeight: FontWeight.w800),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  void _unload() {
+    AppDeps.of(context).controller.unload();
+    setState(() {
+      _output.clear();
+      _exported = false;
+      _error = null;
+    });
   }
 }
 
-class _StatusCard extends StatelessWidget {
-  const _StatusCard({required this.controller});
+class _StatusStrip extends StatelessWidget {
+  const _StatusStrip({required this.controller, required this.onUnload});
 
   final EditorController controller;
+  final VoidCallback onUnload;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    if (!controller.hasSave) {
-      return Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
+    final p = PixelPalette.of(context);
+    final loaded = controller.hasSave;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+      decoration: BoxDecoration(
+        color: loaded ? p.panel : p.paperAlt,
+        border: Border.all(color: p.border, width: PixelSize.border),
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final narrow = constraints.maxWidth < 620;
+          final icon = PixelGlyph(
+            loaded ? PixelIcons.check : PixelIcons.warning,
+            size: 16,
+            color: loaded ? p.success : p.goldDeep,
+            accent: loaded ? p.success : p.gold,
+          );
+          final text = Text(
+            loaded
+                ? '存档已载入 · 可以前往总览 / 角色 / 背包 / 进度编辑'
+                : '尚未载入存档 · 在下方粘贴游戏 EXPORT 得到的字符串',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: loaded ? p.ink : p.inkSoft,
+              fontWeight: FontWeight.w700,
+            ),
+          );
+          final actions = Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.hourglass_empty_rounded,
-                  color: theme.colorScheme.onSurfaceVariant, size: 20),
-              const SizedBox(width: 10),
-              Text(
-                '尚未载入存档',
-                style: theme.textTheme.bodyMedium
-                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              PixelBadge(
+                'User ID ${controller.userId}',
+                tone: PixelBadgeTone.neutral,
+              ),
+              const SizedBox(width: 8),
+              PixelButton(
+                label: '卸载',
+                icon: PixelIcons.close,
+                size: PixelButtonSize.small,
+                tone: PixelButtonTone.ghost,
+                onPressed: onUnload,
+              ),
+            ],
+          );
+          if (!loaded) {
+            return Row(
+              children: [
+                icon,
+                const SizedBox(width: 8),
+                Expanded(child: text),
+              ],
+            );
+          }
+          if (narrow) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    icon,
+                    const SizedBox(width: 8),
+                    Expanded(child: text),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Align(alignment: Alignment.centerRight, child: actions),
+              ],
+            );
+          }
+          return Row(
+            children: [
+              icon,
+              const SizedBox(width: 8),
+              Expanded(child: text),
+              actions,
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _ImportPanel extends StatelessWidget {
+  const _ImportPanel({
+    required this.controller,
+    required this.input,
+    required this.error,
+    required this.onClearError,
+    required this.onPaste,
+    required this.onSample,
+    required this.onDecode,
+  });
+
+  final EditorController controller;
+  final TextEditingController input;
+  final String? error;
+  final VoidCallback onClearError;
+  final VoidCallback onPaste;
+  final VoidCallback onSample;
+  final VoidCallback onDecode;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = PixelPalette.of(context);
+    return PixelPanel(
+      title: '① 导入存档',
+      subtitle: '在游戏中点击 EXPORT 复制存档字符串，粘贴到下方后解析',
+      icon: PixelIcons.download,
+      accent: p.gold,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          PixelTextField(
+            controller: input,
+            hint: '粘贴存档字符串…',
+            maxLines: 6,
+            mono: true,
+            onChanged: (_) => onClearError(),
+          ),
+          if (error != null) ...[
+            const SizedBox(height: 10),
+            PixelCallout(
+              message: error!,
+              icon: PixelIcons.warning,
+              tone: PixelBadgeTone.danger,
+              title: '解析失败',
+            ),
+          ],
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              PixelButton(
+                label: '粘贴剪贴板',
+                icon: PixelIcons.copy,
+                onPressed: onPaste,
+              ),
+              PixelButton(
+                label: '示例存档',
+                icon: PixelIcons.spark,
+                onPressed: onSample,
+              ),
+              PixelButton(
+                label: '解析存档',
+                icon: PixelIcons.unlock,
+                tone: PixelButtonTone.primary,
+                onPressed: onDecode,
               ),
             ],
           ),
-        ),
-      );
-    }
+        ],
+      ),
+    );
+  }
+}
 
-    final warn = controller.decodeWarning;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(Icons.check_rounded,
-                      size: 16, color: theme.colorScheme.onPrimaryContainer),
-                ),
-                const SizedBox(width: 10),
-                Text('已解析',
-                    style: theme.textTheme.titleSmall
-                        ?.copyWith(fontWeight: FontWeight.w700)),
-                const Spacer(),
-                InfoBadge('User ID  ${controller.userId}'),
-              ],
+class _ExportPanel extends StatelessWidget {
+  const _ExportPanel({
+    required this.controller,
+    required this.output,
+    required this.exported,
+    required this.onExport,
+  });
+
+  final EditorController controller;
+  final TextEditingController output;
+  final bool exported;
+  final VoidCallback onExport;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = PixelPalette.of(context);
+    return PixelPanel(
+      title: '② 导出存档',
+      subtitle: '在其他页面编辑存档后生成新存档',
+      icon: PixelIcons.upload,
+      accent: p.gold,
+      trailing: PixelButton(
+        label: '生成新存档',
+        icon: PixelIcons.spark,
+        tone: PixelButtonTone.primary,
+        size: PixelButtonSize.small,
+        onPressed: controller.hasSave ? onExport : null,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          PixelTextField(
+            controller: output,
+            hint: '生成的新存档字符串将显示在这里…',
+            maxLines: 6,
+            readOnly: true,
+            mono: true,
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.end,
+            children: [
+              PixelButton(
+                label: '复制到剪贴板',
+                icon: PixelIcons.copy,
+                onPressed: output.text.isEmpty
+                    ? null
+                    : () async {
+                        await Clipboard.setData(
+                          ClipboardData(text: output.text),
+                        );
+                        if (context.mounted) {
+                          showAppSnackBar(context, '已复制到剪贴板，回游戏 IMPORT 即可');
+                        }
+                      },
+              ),
+            ],
+          ),
+          if (exported) ...[
+            const SizedBox(height: 10),
+            PixelCallout(
+              message: '修改存档前请务必备份原始字符串，编辑风险自负。',
+              icon: PixelIcons.warning,
+              tone: PixelBadgeTone.gold,
             ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                InfoBadge('密文 ${controller.sourceString?.length ?? 0} 字符'),
-                InfoBadge('数据 ${controller.rawData?.length ?? 0} 值'),
-                InfoBadge(
-                    '金币 ${formatInt(controller.gold)}',
-                    color: theme.colorScheme.tertiary),
-                InfoBadge('等级 ${controller.level}'),
-                InfoBadge('关卡 ${controller.stage}'),
-              ],
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ArchiveInfobox extends StatelessWidget {
+  const _ArchiveInfobox({required this.controller});
+
+  final EditorController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = PixelPalette.of(context);
+    final loaded = controller.hasSave;
+    return PixelPanel(
+      title: '存档档案',
+      icon: PixelIcons.book,
+      accent: p.gold,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          PixelInfoTable(
+            rows: [
+              PixelInfoRow(
+                '状态',
+                loaded ? '已载入' : '未载入',
+                valueColor: loaded ? p.success : p.inkFaint,
+              ),
+              PixelInfoRow(
+                'User ID',
+                loaded ? controller.userId : '—',
+                mono: true,
+              ),
+              PixelInfoRow(
+                '密文长度',
+                loaded ? '${controller.sourceString?.length ?? 0} 字符' : '—',
+                mono: true,
+              ),
+              PixelInfoRow(
+                '数据值',
+                loaded ? '${controller.rawData?.length ?? 0} 个' : '—',
+                mono: true,
+              ),
+              PixelInfoRow(
+                '金币',
+                loaded ? formatInt(controller.gold) : '—',
+                mono: true,
+                valueColor: p.goldDeep,
+              ),
+              PixelInfoRow(
+                '等级',
+                loaded ? '${controller.level}' : '—',
+                mono: true,
+              ),
+              PixelInfoRow(
+                '当前关卡',
+                loaded ? '${controller.stage}' : '—',
+                mono: true,
+              ),
+            ],
+          ),
+          if (controller.decodeWarning != null) ...[
+            const SizedBox(height: 10),
+            PixelCallout(
+              message: controller.decodeWarning!,
+              icon: PixelIcons.info,
+              tone: PixelBadgeTone.link,
             ),
-            if (warn != null) ...[
-              const SizedBox(height: 10),
-              Row(
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _GuidePanel extends StatelessWidget {
+  const _GuidePanel();
+
+  @override
+  Widget build(BuildContext context) {
+    final p = PixelPalette.of(context);
+    const steps = [
+      ('01', '导出', '在游戏中打开 IMPORT / EXPORT，复制存档字符串。'),
+      ('02', '导入', '粘贴到「导入存档」并解析，随后编辑各页面。'),
+      ('03', '回写', '生成新存档并复制，回到游戏 IMPORT。'),
+    ];
+    return PixelPanel(
+      title: '使用说明',
+      icon: PixelIcons.info,
+      dense: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final (no, title, body) in steps)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.info_outline,
-                      size: 16, color: theme.colorScheme.tertiary),
-                  const SizedBox(width: 6),
-                  Expanded(
+                  Container(
+                    width: 26,
+                    height: 26,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: p.ink,
+                      border: Border.all(color: p.border, width: 2),
+                    ),
                     child: Text(
-                      warn,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.tertiary,
+                      no,
+                      style: TextStyle(
+                        fontFamily: PixelFont.mono,
+                        fontFamilyFallback: PixelFont.fallback,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: p.panel,
                       ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                        const SizedBox(height: 1),
+                        Text(
+                          body,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: p.inkSoft, height: 1.55),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-            ],
-          ],
-        ),
+            ),
+          PixelDivider(color: p.border.withValues(alpha: 0.35)),
+          const SizedBox(height: 8),
+          Text(
+            '提示：物品在背包中以等级记录，0 级表示未获取。',
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: p.inkSoft, height: 1.6),
+          ),
+        ],
       ),
     );
   }

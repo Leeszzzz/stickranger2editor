@@ -1,11 +1,13 @@
-/// 物品选择对话框：按槽位过滤 + 搜索。
+/// 物品选择对话框：像素百科风格的物品检索面板。
 library;
 
 import 'package:flutter/material.dart';
 
 import '../../models/game_data.dart';
-import 'common.dart';
+import '../../theme/pixel_theme.dart';
 import 'item_icon.dart';
+import 'pixel_icons.dart';
+import 'pixel_kit.dart';
 
 /// 装备槽定义（与存档 ac[4][8] 对应）。
 class SlotMeta {
@@ -32,203 +34,209 @@ Future<int?> showItemPicker(
   SlotMeta? slot,
   String title = '选择物品',
 }) {
-  return showDialog<int>(
+  return showPixelDialog<int>(
     context: context,
-    builder: (_) => _ItemPickerDialog(catalog: catalog, slot: slot, title: title),
+    title: title,
+    icon: PixelIcons.bag,
+    subtitle: slot == null ? '检索物品数据库' : '只显示可放入「${slot.label}」的物品',
+    maxWidth: 680,
+    child: _ItemPickerBody(catalog: catalog, slot: slot),
+    actions: [
+      PixelButton(
+        label: '清空槽位',
+        icon: PixelIcons.trash,
+        tone: PixelButtonTone.danger,
+        onPressed: () => Navigator.of(context).pop(0),
+      ),
+      PixelButton(label: '取消', onPressed: () => Navigator.of(context).pop()),
+    ],
   );
 }
 
-class _ItemPickerDialog extends StatefulWidget {
-  const _ItemPickerDialog({
-    required this.catalog,
-    required this.slot,
-    required this.title,
-  });
+class _ItemPickerBody extends StatefulWidget {
+  const _ItemPickerBody({required this.catalog, required this.slot});
 
   final GameCatalog catalog;
   final SlotMeta? slot;
-  final String title;
 
   @override
-  State<_ItemPickerDialog> createState() => _ItemPickerDialogState();
+  State<_ItemPickerBody> createState() => _ItemPickerBodyState();
 }
 
-class _ItemPickerDialogState extends State<_ItemPickerDialog> {
+class _ItemPickerBodyState extends State<_ItemPickerBody> {
   String _query = '';
-  late final List<String> _subtypes;
+  String _subtype = '全部';
 
-  @override
-  void initState() {
-    super.initState();
+  static const _weaponTypes = ['全部', '拳套', '剑', '枪', '弓', '杖'];
+
+  bool get _isWeaponSlot => widget.slot?.accepted?.contains('Weapon') ?? false;
+
+  List<int> _filtered() {
+    final catalog = widget.catalog;
     final accepted = widget.slot?.accepted;
-    if (accepted != null && accepted.contains('Weapon')) {
-      _subtypes = ['全部', '拳套', '剑', '枪', '弓', '杖'];
-    } else {
-      _subtypes = const ['全部'];
-    }
-  }
-
-  int _selectedSubtype = 0;
-
-  List<int> get _filtered {
-    final cat = widget.slot?.accepted;
     final q = _query.trim().toLowerCase();
-    final result = <int>[];
-    for (final id in widget.catalog.items.keys.toList()..sort()) {
-      final category = widget.catalog.itemCategory(id);
-      if (cat != null && !cat.contains(category)) continue;
-      if (_subtypes.length > 1 && _selectedSubtype > 0) {
-        if (widget.catalog.weaponSubtype(id) != _subtypes[_selectedSubtype]) {
-          continue;
-        }
-      }
+    final ids = <int>[];
+    for (final id in catalog.items.keys.toList()..sort()) {
+      final cat = catalog.itemCategory(id);
+      if (accepted != null && !accepted.contains(cat)) continue;
+      if (_subtype != '全部' && catalog.categoryLabel(id) != _subtype) continue;
       if (q.isNotEmpty) {
-        final name = widget.catalog.itemName(id).toLowerCase();
+        final name = catalog.itemName(id).toLowerCase();
         if (!name.contains(q) && !'$id'.contains(q)) continue;
       }
-      result.add(id);
+      ids.add(id);
     }
-    return result;
+    return ids;
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final items = _filtered;
-    return Dialog(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 520, maxHeight: 640),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    final p = PixelPalette.of(context);
+    final items = _filtered();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        PixelTextField(
+          hint: '搜索物品名称或 ID…',
+          prefixIcon: PixelIcons.search,
+          onChanged: (v) => setState(() => _query = v),
+        ),
+        if (_isWeaponSlot) ...[
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      widget.title,
-                      style: theme.textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close, size: 20),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      autofocus: true,
-                      onChanged: (v) => setState(() => _query = v),
-                      decoration: const InputDecoration(
-                        prefixIcon: Icon(Icons.search, size: 20),
-                        hintText: '搜索名称或 ID…',
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              if (_subtypes.length > 1) ...[
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 6,
-                  children: [
-                    for (var i = 0; i < _subtypes.length; i++)
-                      ChoiceChip(
-                        label: Text(
-                          _subtypes[i],
-                          overflow: TextOverflow.visible,
-                        ),
-                        selected: _selectedSubtype == i,
-                        onSelected: (_) => setState(() => _selectedSubtype = i),
-                        visualDensity: VisualDensity.compact,
-                      ),
-                  ],
+              for (final type in _weaponTypes)
+                PixelChip(
+                  label: type,
+                  dense: true,
+                  selected: _subtype == type,
+                  onTap: () => setState(() => _subtype = type),
                 ),
-              ],
-              const SizedBox(height: 8),
-              ListTile(
-                dense: true,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                leading: Icon(Icons.block_rounded, color: theme.colorScheme.outline),
-                title: const Text('空（NONE）'),
-                onTap: () => Navigator.of(context).pop(0),
-              ),
-              Expanded(
-                child: items.isEmpty
-                    ? Center(
-                        child: Text(
-                          '没有匹配的物品',
-                          style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-                        ),
-                      )
-                    : ListView.builder(
-                        itemCount: items.length,
-                        itemBuilder: (context, i) =>
-                            _ItemTile(catalog: widget.catalog, itemId: items[i]),
-                      ),
-              ),
-              const SizedBox(height: 4),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Text(
-                  '${items.length} 项',
-                  style: theme.textTheme.labelSmall
-                      ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                ),
-              ),
             ],
           ),
+        ],
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Text(
+              '共 ${items.length} 件',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: p.inkSoft,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              '按 ID 排序',
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: p.inkFaint),
+            ),
+          ],
         ),
-      ),
+        const SizedBox(height: 6),
+        Container(
+          height: 380,
+          decoration: BoxDecoration(
+            border: Border.all(color: p.border, width: 1),
+          ),
+          child: items.isEmpty
+              ? Center(
+                  child: Text(
+                    '没有匹配的物品',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: p.inkSoft),
+                  ),
+                )
+              : GridView.builder(
+                  padding: const EdgeInsets.all(6),
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 210,
+                    mainAxisExtent: 56,
+                    mainAxisSpacing: 6,
+                    crossAxisSpacing: 6,
+                  ),
+                  itemCount: items.length,
+                  itemBuilder: (context, i) =>
+                      _ItemTile(catalog: widget.catalog, itemId: items[i]),
+                ),
+        ),
+      ],
     );
   }
 }
 
-class _ItemTile extends StatelessWidget {
+class _ItemTile extends StatefulWidget {
   const _ItemTile({required this.catalog, required this.itemId});
 
   final GameCatalog catalog;
   final int itemId;
 
   @override
-  Widget build(BuildContext context) {
-    final stats = catalog.itemStats(itemId);
-    final name = catalog.itemName(itemId);
-    final dmg = stats?.damageType ?? 'Physical';
-    final dmgColor = Color(damageTypeColors[dmg] ?? 0xFF8B949E);
-    final isWeapon = stats != null && stats.typeCategory == 3;
-    final subtitleParts = <String>[
-      if (stats != null && (isWeapon || stats.typeCategory == 4))
-        'AT ${stats.atMin}-${stats.atMax}',
-      if (stats != null && stats.agi > 0) 'AGI ${stats.agi}',
-      if (stats != null && stats.range > 0) 'RANGE ${stats.range}',
-      if (stats != null && stats.lvCap > 0) 'Lv.cap ${stats.lvCap}',
-    ];
+  State<_ItemTile> createState() => _ItemTileState();
+}
 
-    return ListTile(
-      dense: true,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      leading: ItemIcon(catalog: catalog, itemId: itemId, size: 36),
-      title: Text(
-        name,
-        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-      ),
-      subtitle: subtitleParts.isEmpty
-          ? null
-          : Text(
-              subtitleParts.join(' · '),
-              style: const TextStyle(fontSize: 12, fontFeatures: tabularFigures),
+class _ItemTileState extends State<_ItemTile> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = PixelPalette.of(context);
+    final stats = widget.catalog.itemStats(widget.itemId);
+    return InkWell(
+      onTap: () => Navigator.of(context).pop(widget.itemId),
+      onHover: (v) => setState(() => _hover = v),
+      mouseCursor: SystemMouseCursors.click,
+      hoverColor: Colors.transparent,
+      splashFactory: NoSplash.splashFactory,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 70),
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
+        decoration: BoxDecoration(
+          color: _hover ? p.goldSoft : p.paperAlt,
+          border: Border.all(color: _hover ? p.gold : p.border, width: 1),
+        ),
+        child: Row(
+          children: [
+            ItemIcon(catalog: widget.catalog, itemId: widget.itemId, size: 32),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    widget.catalog.itemName(widget.itemId),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    stats == null
+                        ? 'ID ${widget.itemId}'
+                        : '#${widget.itemId} · ${widget.catalog.categoryLabel(widget.itemId)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontFamily: PixelFont.mono,
+                      fontFamilyFallback: PixelFont.fallback,
+                      fontSize: 12,
+                      height: 1.3,
+                      color: p.inkFaint,
+                    ),
+                  ),
+                ],
+              ),
             ),
-      trailing: dmgColor != const Color(0xFF8B949E)
-          ? InfoBadge(damageTypeLabels[dmg] ?? dmg, color: dmgColor)
-          : null,
-      onTap: () => Navigator.of(context).pop(itemId),
+          ],
+        ),
+      ),
     );
   }
 }

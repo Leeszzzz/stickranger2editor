@@ -1,5 +1,5 @@
 name: sr2editor
-description: "Stick Ranger 2 save editor - Material 3 Flutter edition."
+description: "Stick Ranger 2 save editor - pixel wiki Flutter edition."
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -25,3 +25,10 @@ flutter:
     - assets/item_stats.json
     - assets/achievement_data.json
     - assets/icons/
+  fonts:
+    - family: FusionPixel
+      fonts:
+        - asset: assets/fonts/FusionPixel12.ttf
+    - family: FusionPixelMono
+      fonts:
+        - asset: assets/fonts/FusionPixelMono12.ttf

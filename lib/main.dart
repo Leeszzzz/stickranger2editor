@@ -46,8 +46,11 @@ class AppDeps extends InheritedWidget {
 
 /// 订阅编辑器状态变化（InheritedNotifier）。
 class EditorScope extends InheritedNotifier<EditorController> {
-  const EditorScope({super.key, required EditorController controller, required super.child})
-      : super(notifier: controller);
+  const EditorScope({
+    super.key,
+    required EditorController controller,
+    required super.child,
+  }) : super(notifier: controller);
 
   static EditorController watch(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<EditorScope>()!.notifier!;
@@ -78,11 +81,12 @@ class SR2EditorApp extends StatelessWidget {
       child: ListenableBuilder(
         listenable: settings,
         builder: (context, _) => MaterialApp(
-          title: 'SR2 存档编辑器',
+          title: 'SR2 EDITOR · Stick Ranger 2',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light,
           darkTheme: AppTheme.dark,
           themeMode: settings.themeMode,
+          themeAnimationDuration: const Duration(milliseconds: 140),
           home: AppShell(),
         ),
       ),

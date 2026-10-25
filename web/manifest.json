@@ -1,11 +1,11 @@
 {
-    "name": "sr2editor",
-    "short_name": "sr2editor",
+    "name": "SR2 EDITOR · Stick Ranger 2",
+    "short_name": "SR2 EDITOR",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#E7DCC2",
+    "theme_color": "#241C14",
+    "description": "Stick Ranger 2 存档编辑器。",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

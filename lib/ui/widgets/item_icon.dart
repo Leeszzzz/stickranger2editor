@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/game_data.dart';
 import '../../models/icon_assets.dart';
+import '../../theme/pixel_theme.dart';
 
 class ItemIcon extends StatelessWidget {
   const ItemIcon({
@@ -21,23 +22,27 @@ class ItemIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final p = PixelPalette.of(context);
     final stats = catalog.itemStats(itemId);
     final iconIndex = stats?.icon;
     final hasAsset =
         iconIndex != null && kAvailableIconIndices.contains(iconIndex);
+    final dmg = stats?.damageType ?? 'Physical';
+    final dmgColor = Color(damageTypeColors[dmg] ?? 0xFF8B949E);
+    final frame = BoxDecoration(
+      color: Color.alphaBlend(dmgColor.withValues(alpha: 0.12), p.paperAlt),
+      border: Border.all(color: p.border, width: 2),
+    );
 
     if (hasAsset) {
-      final dmg = stats?.damageType ?? 'Physical';
-      final dmgColor = Color(damageTypeColors[dmg] ?? 0xFF8B949E);
-      // 游戏内物品图标用 r[i][5]（0xRRGGBB）乘法染色：白→物品色、灰→暗部。
-      final tintColor = stats != null && stats.color > 0 && stats.color != 0xFFFFFF
+      final tintColor =
+          stats != null && stats.color > 0 && stats.color != 0xFFFFFF
           ? Color(0xFF000000 | stats.color)
           : null;
       Widget img = Image.asset(
         iconAssetPath(iconIndex),
-        width: size * 0.82,
-        height: size * 0.82,
+        width: size * 0.74,
+        height: size * 0.74,
         filterQuality: FilterQuality.none,
         fit: BoxFit.contain,
       );
@@ -51,35 +56,58 @@ class ItemIcon extends StatelessWidget {
         width: size,
         height: size,
         alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: dmgColor.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(size * 0.24),
-        ),
+        decoration: frame,
         child: img,
       );
     }
 
     // 回退：分类首字徽章（特殊物品 / 未引用图标）。
     final empty = itemId == 0;
+    final catColor = _categoryColor(catalog.itemCategory(itemId), p);
     return Container(
       width: size,
       height: size,
       alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(size * 0.24),
-      ),
+      decoration: empty
+          ? frame
+          : frame.copyWith(
+              color: Color.alphaBlend(
+                catColor.withValues(alpha: 0.18),
+                p.paperAlt,
+              ),
+            ),
       child: empty
-          ? Icon(Icons.block_rounded,
-              size: size * 0.5, color: theme.colorScheme.outline)
+          ? Text(
+              '—',
+              style: TextStyle(
+                fontFamily: PixelFont.mono,
+                fontFamilyFallback: PixelFont.fallback,
+                fontSize: size * 0.5,
+                fontWeight: FontWeight.w700,
+                color: p.inkFaint,
+              ),
+            )
           : Text(
               catalog.categoryLabel(itemId).characters.first,
               style: TextStyle(
+                fontFamily: PixelFont.family,
+                fontFamilyFallback: PixelFont.fallback,
                 fontSize: size * 0.42,
                 fontWeight: FontWeight.w700,
-                color: theme.colorScheme.onSurfaceVariant,
+                color: p.ink,
               ),
             ),
     );
+  }
+
+  static Color _categoryColor(String category, PixelPalette p) {
+    return switch (category) {
+      'Weapon' => p.danger,
+      'Skill' => p.link,
+      'Hat' => p.success,
+      'Ring' => p.gold,
+      'Amulet' => p.info,
+      _ => p.inkSoft,
+    };
   }
 }

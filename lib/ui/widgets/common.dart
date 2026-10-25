@@ -1,8 +1,12 @@
-/// 通用 UI 组件：统计卡 / 区块卡 / 数字编辑器 / 空态 / 小工具。
+/// 通用像素组件：统计卡 / 区块卡 / 数字编辑器 / 空态 / 小工具。
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import '../../theme/pixel_theme.dart';
+import 'pixel_icons.dart';
+import 'pixel_kit.dart';
 
 /// 千分位格式化。
 String formatInt(int v) {
@@ -18,8 +22,8 @@ String formatInt(int v) {
 
 const tabularFigures = [FontFeature.tabularFigures()];
 
-/// 大数值统计卡。
-class StatCard extends StatelessWidget {
+/// 大数值统计卡：像素面板 + 硬投影 + 可点击编辑。
+class StatCard extends StatefulWidget {
   const StatCard({
     super.key,
     required this.label,
@@ -32,65 +36,105 @@ class StatCard extends StatelessWidget {
 
   final String label;
   final String value;
-  final IconData icon;
+  final PixelGlyphData icon;
   final Color color;
   final String? max;
   final VoidCallback? onTap;
 
   @override
+  State<StatCard> createState() => _StatCardState();
+}
+
+class _StatCardState extends State<StatCard> {
+  bool _hover = false;
+
+  @override
   Widget build(BuildContext context) {
+    final p = PixelPalette.of(context);
     final theme = Theme.of(context);
-    return Card(
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(icon, size: 18, color: color),
-                  const SizedBox(width: 6),
+    return InkWell(
+      onTap: widget.onTap,
+      onHover: widget.onTap == null ? null : (v) => setState(() => _hover = v),
+      mouseCursor: widget.onTap == null
+          ? SystemMouseCursors.basic
+          : SystemMouseCursors.click,
+      hoverColor: Colors.transparent,
+      splashFactory: NoSplash.splashFactory,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 90),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: _hover ? p.panelAlt : p.panel,
+          border: Border.all(
+            color: _hover ? p.gold : p.border,
+            width: PixelSize.border,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: p.shadow,
+              offset: const Offset(4, 4),
+              blurRadius: 0,
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                PixelGlyph(
+                  widget.icon,
+                  size: 16,
+                  color: widget.color,
+                  accent: widget.color,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  widget.label,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: p.inkSoft,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const Spacer(),
+                if (widget.onTap != null)
                   Text(
-                    label,
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                    _hover ? '编辑 →' : '编辑',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: _hover ? p.goldDeep : p.inkFaint,
                     ),
                   ),
-                  const Spacer(),
-                  if (onTap != null)
-                    Icon(Icons.edit_outlined,
-                        size: 16, color: theme.colorScheme.onSurfaceVariant),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                value,
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  fontFeatures: tabularFigures,
-                  color: color,
-                ),
-              ),
-              if (max != null) ...[
-                const SizedBox(height: 2),
-                Text(
-                  '上限 $max',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
               ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              widget.value,
+              style: TextStyle(
+                fontFamily: PixelFont.family,
+                fontFamilyFallback: PixelFont.fallback,
+                fontSize: PixelSize.value,
+                height: 1.05,
+                fontWeight: FontWeight.w700,
+                fontFeatures: tabularFigures,
+                color: widget.color,
+              ),
+            ),
+            if (widget.max != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                '上限 ${widget.max}',
+                style: theme.textTheme.bodySmall?.copyWith(color: p.inkFaint),
+              ),
             ],
-          ),
+          ],
         ),
       ),
     );
   }
 }
 
-/// 带标题栏的区块卡片。
+/// 兼容旧 API 的区块卡（内部为 PixelPanel）。
 class SectionCard extends StatelessWidget {
   const SectionCard({
     super.key,
@@ -103,9 +147,7 @@ class SectionCard extends StatelessWidget {
   });
 
   final String title;
-  final IconData? icon;
-
-  /// 自定义标题图标（如像素 sprite），优先于 [icon]。
+  final PixelGlyphData? icon;
   final Widget? iconWidget;
   final String? subtitle;
   final Widget? trailing;
@@ -113,50 +155,18 @@ class SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                if (iconWidget != null) ...[
-                  iconWidget!,
-                  const SizedBox(width: 8),
-                ] else if (icon != null) ...[
-                  Icon(icon, size: 18, color: theme.colorScheme.primary),
-                  const SizedBox(width: 8),
-                ],
-                Expanded(
-                  child: Text(
-                    title,
-                    style: theme.textTheme.titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                ),
-                ?trailing,
-              ],
-            ),
-            if (subtitle != null) ...[
-              const SizedBox(height: 2),
-              Text(
-                subtitle!,
-                style: theme.textTheme.bodySmall
-                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-              ),
-            ],
-            const SizedBox(height: 12),
-            child,
-          ],
-        ),
-      ),
+    return PixelPanel(
+      title: title,
+      subtitle: subtitle,
+      icon: icon,
+      iconWidget: iconWidget,
+      trailing: trailing,
+      child: child,
     );
   }
 }
 
-/// 数字编辑行：[-] 值 [+] ＋点击弹窗精确输入。
+/// 数字编辑行：[-] 值 [+] ＋点击数值精确输入。
 class NumberField extends StatelessWidget {
   const NumberField({
     super.key,
@@ -176,77 +186,91 @@ class NumberField extends StatelessWidget {
   final Color? color;
 
   Future<void> _showDialog(BuildContext context) async {
-    final controller = TextEditingController(text: '$value');
-    final formKey = GlobalKey<FormState>();
-    final result = await showDialog<int>(
+    final p = PixelPalette.of(context);
+    final text = TextEditingController(text: '$value');
+    final result = await showPixelDialog<int>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('设置$label'),
-        content: Form(
-          key: formKey,
-          child: TextFormField(
+      title: '设置$label',
+      icon: PixelIcons.gear,
+      maxWidth: 380,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '$min — $max',
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: p.inkSoft),
+          ),
+          const SizedBox(height: 10),
+          PixelTextField(
+            controller: text,
             autofocus: true,
-            controller: controller,
+            mono: true,
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            decoration: InputDecoration(
-              labelText: '数值（$min - $max）',
-            ),
-            validator: (v) {
-              final n = int.tryParse(v ?? '');
-              if (n == null || n < min || n > max) return '请输入 $min - $max 之间的数值';
-              return null;
+            onSubmitted: (v) {
+              final n = int.tryParse(v);
+              if (n != null) Navigator.of(context).pop(n.clamp(min, max));
             },
-            onFieldSubmitted: (v) {
-              if (formKey.currentState!.validate()) {
-                Navigator.of(context).pop(int.parse(v));
-              }
-            },
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('取消'),
-          ),
-          FilledButton(
-            onPressed: () {
-              if (formKey.currentState!.validate()) {
-                Navigator.of(context).pop(int.parse(controller.text));
-              }
-            },
-            child: const Text('确定'),
           ),
         ],
       ),
+      actions: [
+        PixelButton(label: '取消', onPressed: () => Navigator.of(context).pop()),
+        PixelButton(
+          label: '拉满 $max',
+          icon: PixelIcons.chevronUp,
+          onPressed: () => Navigator.of(context).pop(max),
+        ),
+        PixelButton(
+          label: '确定',
+          tone: PixelButtonTone.primary,
+          onPressed: () {
+            final n = int.tryParse(text.text);
+            Navigator.of(context).pop((n ?? value).clamp(min, max));
+          },
+        ),
+      ],
     );
-    if (result != null) onChanged(result.clamp(min, max));
+    text.dispose();
+    if (result != null) onChanged(result);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final accent = color ?? theme.colorScheme.primary;
+    final p = PixelPalette.of(context);
+    final accent = color ?? p.goldDeep;
     return InkWell(
-      borderRadius: BorderRadius.circular(12),
       onTap: () => _showDialog(context),
+      mouseCursor: SystemMouseCursors.click,
+      hoverColor: Colors.transparent,
+      splashFactory: NoSplash.splashFactory,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
         child: Row(
           children: [
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     label,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                      color: p.inkSoft,
                     ),
                   ),
+                  const SizedBox(height: 2),
                   Text(
                     formatInt(value),
-                    style: theme.textTheme.titleLarge?.copyWith(
+                    style: TextStyle(
+                      fontFamily: PixelFont.family,
+                      fontFamilyFallback: PixelFont.fallback,
+                      fontSize: PixelSize.valueCompact,
+                      height: 1.2,
                       fontWeight: FontWeight.w700,
                       fontFeatures: tabularFigures,
                       color: accent,
@@ -255,23 +279,18 @@ class NumberField extends StatelessWidget {
                 ],
               ),
             ),
-            IconButton(
+            PixelIconButton(
+              icon: PixelIcons.minus,
               tooltip: '减少',
-              visualDensity: VisualDensity.compact,
+              size: PixelButtonSize.small,
               onPressed: value > min ? () => onChanged(value - 1) : null,
-              icon: const Icon(Icons.remove_circle_outline),
             ),
-            IconButton(
+            const SizedBox(width: 6),
+            PixelIconButton(
+              icon: PixelIcons.plus,
               tooltip: '增加',
-              visualDensity: VisualDensity.compact,
+              size: PixelButtonSize.small,
               onPressed: value < max ? () => onChanged(value + 1) : null,
-              icon: const Icon(Icons.add_circle_outline),
-            ),
-            IconButton(
-              tooltip: '精确输入',
-              visualDensity: VisualDensity.compact,
-              onPressed: () => _showDialog(context),
-              icon: const Icon(Icons.keyboard_outlined),
             ),
           ],
         ),
@@ -280,7 +299,7 @@ class NumberField extends StatelessWidget {
   }
 }
 
-/// 未载入存档时的空态。
+/// 未载入存档时的空态：像素插图 + 引导按钮。
 class EmptyState extends StatelessWidget {
   const EmptyState({
     super.key,
@@ -290,43 +309,81 @@ class EmptyState extends StatelessWidget {
     this.onAction,
   });
 
-  final IconData icon;
+  final PixelGlyphData icon;
   final String message;
   final String? actionLabel;
   final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final p = PixelPalette.of(context);
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 56, color: theme.colorScheme.outline),
-            const SizedBox(height: 16),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyLarge
-                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 460),
+          child: PixelPanel(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 96,
+                  height: 96,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: p.panelAlt,
+                    border: Border.all(
+                      color: p.border,
+                      width: PixelSize.border,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: p.shadow,
+                        offset: const Offset(4, 4),
+                        blurRadius: 0,
+                      ),
+                    ],
+                  ),
+                  child: PixelGlyph(icon, size: 64),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  'NO DATA',
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: p.goldDeep,
+                    letterSpacing: 3,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: p.inkSoft,
+                    height: 1.75,
+                  ),
+                ),
+                if (actionLabel != null && onAction != null) ...[
+                  const SizedBox(height: 18),
+                  PixelButton(
+                    label: actionLabel!,
+                    icon: PixelIcons.save,
+                    tone: PixelButtonTone.primary,
+                    size: PixelButtonSize.large,
+                    onPressed: onAction,
+                  ),
+                ],
+              ],
             ),
-            if (actionLabel != null && onAction != null) ...[
-              const SizedBox(height: 20),
-              FilledButton.tonal(
-                onPressed: onAction,
-                child: Text(actionLabel!),
-              ),
-            ],
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-/// 换行内嵌信息徽章。
+/// 换行内嵌信息徽章（保留旧 API）。
 class InfoBadge extends StatelessWidget {
   const InfoBadge(this.text, {super.key, this.color, this.background});
 
@@ -336,33 +393,33 @@ class InfoBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final p = PixelPalette.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: background ?? theme.colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(6),
+        color: background ?? p.panelAlt,
+        border: Border.all(color: p.border.withValues(alpha: 0.7), width: 1),
       ),
       child: Text(
         text,
-        style: theme.textTheme.labelSmall?.copyWith(
-          color: color ?? theme.colorScheme.onSurfaceVariant,
+        style: TextStyle(
+          fontFamily: PixelFont.family,
+          fontFamilyFallback: PixelFont.fallback,
+          fontSize: 12,
+          height: 1.35,
+          fontWeight: FontWeight.w700,
           fontFeatures: tabularFigures,
+          color: color ?? p.inkSoft,
         ),
       ),
     );
   }
 }
 
-void showAppSnackBar(BuildContext context, String message, {bool error = false}) {
-  ScaffoldMessenger.of(context)
-    ..hideCurrentSnackBar()
-    ..showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: error ? Theme.of(context).colorScheme.errorContainer : null,
-        showCloseIcon: true,
-      ),
-    );
+void showAppSnackBar(
+  BuildContext context,
+  String message, {
+  bool error = false,
+}) {
+  showPixelToast(context, message, error: error);
 }
