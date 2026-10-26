@@ -4,7 +4,10 @@
 
 - 上游：<https://github.com/TakWolf/fusion-pixel-font>
 - 版本：2026.10.25
-- 授权：SIL Open Font License 1.1（见 `OFL.txt`）
+- 版权：Copyright (c) 2022, TakWolf (https://takwolf.com)
+- 授权：SIL Open Font License 1.1（完整许可证见 `OFL.txt`）
+
+本项目分发的是按当前 UI 文案裁切后的子集，属于修改版本，仍按 SIL OFL 1.1 授权分发。
 
 为控制安装包体积，仓库内只保留按当前 UI 文案与游戏数据裁切的子集
 （约 130 KB / 字体）。若后续新增中文文案，需要重新生成子集：

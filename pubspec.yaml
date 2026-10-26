@@ -25,6 +25,7 @@ flutter:
     - assets/item_stats.json
     - assets/achievement_data.json
     - assets/icons/
+    - assets/fonts/OFL.txt
   fonts:
     - family: FusionPixel
       fonts:
