@@ -88,32 +88,60 @@ class _CharactersScreenState extends State<CharactersScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final twoCol = constraints.maxWidth >= 720;
-                final basic = _BasicPanel(controller: controller, char: _char);
-                final stats = _WeaponStatsPanel(
-                  controller: controller,
-                  char: _char,
-                );
-                if (!twoCol) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [basic, const SizedBox(height: 16), stats],
-                  );
-                }
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(child: basic),
-                    const SizedBox(width: 16),
-                    Expanded(child: stats),
-                  ],
-                );
-              },
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 160),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeIn,
+              layoutBuilder: (currentChild, previousChildren) => Stack(
+                alignment: Alignment.topCenter,
+                children: [...previousChildren, ?currentChild],
+              ),
+              transitionBuilder: (child, animation) => FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.008),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                ),
+              ),
+              child: Column(
+                key: ValueKey(_char),
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final twoCol = constraints.maxWidth >= 720;
+                      final basic = _BasicPanel(
+                        controller: controller,
+                        char: _char,
+                      );
+                      final stats = _WeaponStatsPanel(
+                        controller: controller,
+                        char: _char,
+                      );
+                      if (!twoCol) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [basic, const SizedBox(height: 16), stats],
+                        );
+                      }
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(child: basic),
+                          const SizedBox(width: 16),
+                          Expanded(child: stats),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _EquipmentPanel(controller: controller, char: _char),
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
-            _EquipmentPanel(controller: controller, char: _char),
             const SizedBox(height: 16),
             PixelCallout(
               message:
@@ -358,7 +386,9 @@ class _SlotTileState extends State<_SlotTile> {
       hoverColor: Colors.transparent,
       splashFactory: NoSplash.splashFactory,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 80),
+        duration: const Duration(milliseconds: 90),
+        curve: Curves.easeOut,
+        transform: Matrix4.translationValues(0, _hover ? -1 : 0, 0),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
           color: _hover ? p.panelAlt : p.paperAlt,

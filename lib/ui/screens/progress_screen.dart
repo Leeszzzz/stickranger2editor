@@ -81,7 +81,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               ),
             ),
             Expanded(
-              child: IndexedStack(
+              child: PixelPageSwitcher(
                 index: _tab,
                 children: const [
                   _StagesTab(),
@@ -407,32 +407,46 @@ class _AchievementStageGroup extends StatelessWidget {
   }
 }
 
-class _AchievementRow extends StatelessWidget {
+class _AchievementRow extends StatefulWidget {
   const _AchievementRow({required this.id, required this.last});
 
   final int id;
   final bool last;
 
   @override
+  State<_AchievementRow> createState() => _AchievementRowState();
+}
+
+class _AchievementRowState extends State<_AchievementRow> {
+  bool _hover = false;
+
+  @override
   Widget build(BuildContext context) {
     final p = PixelPalette.of(context);
     final controller = EditorScope.watch(context);
-    final def = controller.catalog.achievementDef(id);
-    final completed = controller.achievementCompleted(id);
+    final def = controller.catalog.achievementDef(widget.id);
+    final completed = controller.achievementCompleted(widget.id);
     return InkWell(
-      onTap: () => controller.setAchievementCompleted(id, !completed),
+      onTap: () => controller.setAchievementCompleted(widget.id, !completed),
+      onHover: (v) => setState(() => _hover = v),
       mouseCursor: SystemMouseCursors.click,
       hoverColor: Colors.transparent,
       splashFactory: NoSplash.splashFactory,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 90),
+        curve: Curves.easeOut,
         decoration: BoxDecoration(
-          color: completed ? p.panel : Colors.transparent,
+          color: completed
+              ? p.panel
+              : (_hover
+                    ? p.goldSoft.withValues(alpha: 0.35)
+                    : Colors.transparent),
           border: Border(
             bottom: BorderSide(
-              color: p.border.withValues(alpha: last ? 0 : 0.16),
+              color: p.border.withValues(alpha: widget.last ? 0 : 0.16),
             ),
             left: BorderSide(
-              color: completed ? p.gold : Colors.transparent,
+              color: completed || _hover ? p.gold : Colors.transparent,
               width: 3,
             ),
           ),
@@ -476,7 +490,8 @@ class _AchievementRow extends StatelessWidget {
             const SizedBox(width: 8),
             PixelCheckbox(
               value: completed,
-              onChanged: (v) => controller.setAchievementCompleted(id, v),
+              onChanged: (v) =>
+                  controller.setAchievementCompleted(widget.id, v),
             ),
           ],
         ),
@@ -640,7 +655,9 @@ class _MedalRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 140),
+            curve: Curves.easeOut,
             width: 34,
             height: 34,
             alignment: Alignment.center,
@@ -822,77 +839,93 @@ class _MonsterTab extends StatelessWidget {
   }
 }
 
-class _MonsterTile extends StatelessWidget {
+class _MonsterTile extends StatefulWidget {
   const _MonsterTile({required this.index});
 
   final int index;
 
   @override
+  State<_MonsterTile> createState() => _MonsterTileState();
+}
+
+class _MonsterTileState extends State<_MonsterTile> {
+  bool _hover = false;
+
+  @override
   Widget build(BuildContext context) {
     final p = PixelPalette.of(context);
     final controller = EditorScope.watch(context);
-    final state = controller.monsterState(index);
-    final face = controller.catalog.monsterFace(index);
+    final state = controller.monsterState(widget.index);
+    final face = controller.catalog.monsterFace(widget.index);
     final faceAsset = face != null && kAvailableEnemyFaces.contains(face)
         ? face
         : null;
-    final faceColor = controller.catalog.monsterColor(index);
+    final faceColor = controller.catalog.monsterColor(widget.index);
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(8, 8, 8, 6),
-      decoration: BoxDecoration(
-        color: state == 0 ? p.paperAlt : p.panel,
-        border: Border.all(
-          color: state == 0 ? p.border.withValues(alpha: 0.5) : p.border,
-          width: PixelSize.border,
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeOut,
+        transform: Matrix4.translationValues(0, _hover ? -1 : 0, 0),
+        padding: const EdgeInsets.fromLTRB(8, 8, 8, 6),
+        decoration: BoxDecoration(
+          color: state == 0 ? p.paperAlt : p.panel,
+          border: Border.all(
+            color: _hover
+                ? p.gold
+                : (state == 0 ? p.border.withValues(alpha: 0.5) : p.border),
+            width: PixelSize.border,
+          ),
         ),
-      ),
-      child: Column(
-        children: [
-          Expanded(
-            child: Center(
-              child: faceAsset == null
-                  ? PixelGlyph(
-                      PixelIcons.skull,
-                      size: 48,
-                      color: p.inkFaint,
-                      accent: p.inkFaint,
-                    )
-                  : Image.asset(
-                      enemyAssetPath(faceAsset),
-                      width: 64,
-                      height: 64,
-                      filterQuality: FilterQuality.none,
-                      color: faceColor != null
-                          ? Color(0xFF000000 | faceColor)
-                          : null,
-                      colorBlendMode: faceColor != null
-                          ? BlendMode.modulate
-                          : null,
-                    ),
+        child: Column(
+          children: [
+            Expanded(
+              child: Center(
+                child: faceAsset == null
+                    ? PixelGlyph(
+                        PixelIcons.skull,
+                        size: 48,
+                        color: p.inkFaint,
+                        accent: p.inkFaint,
+                      )
+                    : Image.asset(
+                        enemyAssetPath(faceAsset),
+                        width: 64,
+                        height: 64,
+                        filterQuality: FilterQuality.none,
+                        color: faceColor != null
+                            ? Color(0xFF000000 | faceColor)
+                            : null,
+                        colorBlendMode: faceColor != null
+                            ? BlendMode.modulate
+                            : null,
+                      ),
+              ),
             ),
-          ),
-          Text(
-            '#${index.toString().padLeft(3, '0')}',
-            style: TextStyle(
-              fontFamily: PixelFont.mono,
-              fontFamilyFallback: PixelFont.fallback,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: state == 0 ? p.inkFaint : p.inkSoft,
+            Text(
+              '#${widget.index.toString().padLeft(3, '0')}',
+              style: TextStyle(
+                fontFamily: PixelFont.mono,
+                fontFamilyFallback: PixelFont.fallback,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: state == 0 ? p.inkFaint : p.inkSoft,
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          PixelSegmented<int>(
-            selected: state,
-            onChanged: (v) => controller.setMonsterState(index, v),
-            segments: const [
-              PixelSegment(0, '未遇'),
-              PixelSegment(1, '已遇'),
-              PixelSegment(2, '查看'),
-            ],
-          ),
-        ],
+            const SizedBox(height: 4),
+            PixelSegmented<int>(
+              selected: state,
+              onChanged: (v) => controller.setMonsterState(widget.index, v),
+              segments: const [
+                PixelSegment(0, '未遇'),
+                PixelSegment(1, '已遇'),
+                PixelSegment(2, '查看'),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

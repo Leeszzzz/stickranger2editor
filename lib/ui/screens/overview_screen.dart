@@ -192,6 +192,8 @@ class _StatGrid extends StatelessWidget {
       StatCard(
         label: '金币',
         value: formatInt(controller.gold),
+        numericValue: controller.gold,
+        formatter: formatInt,
         icon: PixelIcons.coin,
         color: p.goldDeep,
         max: formatInt(EditorController.maxGold),
@@ -206,6 +208,8 @@ class _StatGrid extends StatelessWidget {
       StatCard(
         label: '经验',
         value: formatInt(controller.exp),
+        numericValue: controller.exp,
+        formatter: formatInt,
         icon: PixelIcons.bolt,
         color: p.link,
         max: formatInt(EditorController.maxExp),
@@ -220,6 +224,8 @@ class _StatGrid extends StatelessWidget {
       StatCard(
         label: '等级',
         value: '${controller.level}',
+        numericValue: controller.level,
+        formatter: (v) => '$v',
         icon: PixelIcons.star,
         color: p.success,
         max: '99',

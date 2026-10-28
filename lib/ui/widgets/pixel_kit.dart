@@ -84,6 +84,56 @@ class _PaperPainter extends CustomPainter {
       oldDelegate.dot != dot;
 }
 
+/// 页面 / 页签切换时的淡入与轻微上移。
+///
+/// 所有子页面保持在树中，以保留各页面的滚动位置与筛选状态；
+/// 非当前页会被忽略指针、排除语义并暂停 ticker。
+class PixelPageSwitcher extends StatelessWidget {
+  const PixelPageSwitcher({
+    super.key,
+    required this.index,
+    required this.children,
+    this.duration = const Duration(milliseconds: 180),
+  });
+
+  final int index;
+  final List<Widget> children;
+  final Duration duration;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        for (var i = 0; i < children.length; i++)
+          IgnorePointer(
+            ignoring: i != index,
+            child: AnimatedOpacity(
+              opacity: i == index ? 1 : 0,
+              duration: duration,
+              curve: Curves.easeOut,
+              child: AnimatedSlide(
+                offset: i == index ? Offset.zero : const Offset(0, 0.012),
+                duration: duration,
+                curve: Curves.easeOutCubic,
+                child: TickerMode(
+                  enabled: i == index,
+                  child: ExcludeFocus(
+                    excluding: i != index,
+                    child: ExcludeSemantics(
+                      excluding: i != index,
+                      child: RepaintBoundary(child: children[i]),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
 // ============================================================================
 // 面板
 // ============================================================================
@@ -482,10 +532,14 @@ class _PixelButtonState extends State<PixelButton> {
       ],
     );
 
+    final lift = _hover && _enabled && !_pressed;
     Widget box = Transform.translate(
-      offset: _pressed && _enabled ? const Offset(2, 2) : Offset.zero,
+      offset: _pressed && _enabled
+          ? const Offset(2, 2)
+          : (lift ? const Offset(-1, -1) : Offset.zero),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 70),
+        duration: const Duration(milliseconds: 90),
+        curve: Curves.easeOut,
         height: _height,
         width: widget.iconOnly ? _height : null,
         padding: widget.iconOnly ? EdgeInsets.zero : _padding,
@@ -499,7 +553,7 @@ class _PixelButtonState extends State<PixelButton> {
               ? [
                   BoxShadow(
                     color: p.shadow,
-                    offset: const Offset(3, 3),
+                    offset: Offset(lift ? 4 : 3, lift ? 4 : 3),
                     blurRadius: 0,
                   ),
                 ]
@@ -732,7 +786,14 @@ class _PixelChipState extends State<PixelChip> {
       mouseCursor: SystemMouseCursors.click,
       hoverColor: Colors.transparent,
       splashFactory: NoSplash.splashFactory,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeOut,
+        transform: Matrix4.translationValues(
+          0,
+          _hover && !widget.selected ? -1 : 0,
+          0,
+        ),
         padding: EdgeInsets.symmetric(
           horizontal: widget.dense ? 6 : 8,
           vertical: widget.dense ? 3 : 4,
@@ -740,6 +801,15 @@ class _PixelChipState extends State<PixelChip> {
         decoration: BoxDecoration(
           color: bg,
           border: Border.all(color: border, width: PixelSize.border),
+          boxShadow: widget.selected || _hover
+              ? [
+                  BoxShadow(
+                    color: p.shadow,
+                    offset: const Offset(2, 2),
+                    blurRadius: 0,
+                  ),
+                ]
+              : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -748,8 +818,8 @@ class _PixelChipState extends State<PixelChip> {
               PixelGlyph(widget.icon!, size: 16, color: fg, accent: fg),
               const SizedBox(width: 5),
             ],
-            Text(
-              widget.label,
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 100),
               style: TextStyle(
                 fontFamily: PixelFont.family,
                 fontFamilyFallback: PixelFont.fallback,
@@ -758,6 +828,7 @@ class _PixelChipState extends State<PixelChip> {
                 fontWeight: FontWeight.w700,
                 color: fg,
               ),
+              child: Text(widget.label),
             ),
           ],
         ),
@@ -803,7 +874,9 @@ class PixelSegmented<T> extends StatelessWidget {
             mouseCursor: SystemMouseCursors.click,
             hoverColor: Colors.transparent,
             splashFactory: NoSplash.splashFactory,
-            child: Container(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 120),
+              curve: Curves.easeOut,
               height: 32,
               padding: const EdgeInsets.symmetric(horizontal: 8),
               decoration: BoxDecoration(
@@ -830,16 +903,19 @@ class PixelSegmented<T> extends StatelessWidget {
                     ),
                     const SizedBox(width: 5),
                   ],
-                  Text(
-                    s.label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  AnimatedDefaultTextStyle(
+                    duration: const Duration(milliseconds: 120),
                     style: TextStyle(
                       fontFamily: PixelFont.family,
                       fontFamilyFallback: PixelFont.fallback,
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                       color: isSelected ? p.panel : p.ink,
+                    ),
+                    child: Text(
+                      s.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
@@ -893,7 +969,9 @@ class _PixelCheckboxState extends State<PixelCheckbox> {
             : SystemMouseCursors.basic,
         hoverColor: Colors.transparent,
         splashFactory: NoSplash.splashFactory,
-        child: Container(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 90),
+          curve: Curves.easeOut,
           width: widget.size,
           height: widget.size,
           decoration: BoxDecoration(
@@ -903,9 +981,14 @@ class _PixelCheckboxState extends State<PixelCheckbox> {
               width: PixelSize.border,
             ),
           ),
-          child: widget.value
-              ? CustomPaint(painter: _CheckPainter(color: p.panel))
-              : null,
+          child: TweenAnimationBuilder<double>(
+            tween: Tween<double>(end: widget.value ? 1 : 0),
+            duration: const Duration(milliseconds: 120),
+            curve: Curves.easeOut,
+            builder: (context, progress, _) => CustomPaint(
+              painter: _CheckPainter(color: p.panel, progress: progress),
+            ),
+          ),
         ),
       ),
     );
@@ -913,8 +996,21 @@ class _PixelCheckboxState extends State<PixelCheckbox> {
 }
 
 class _CheckPainter extends CustomPainter {
-  const _CheckPainter({required this.color});
+  const _CheckPainter({required this.color, this.progress = 1});
   final Color color;
+  final double progress;
+
+  static const _points = [
+    (2, 6),
+    (3, 7),
+    (4, 8),
+    (5, 7),
+    (6, 6),
+    (7, 5),
+    (8, 4),
+    (9, 3),
+    (10, 2),
+  ];
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -922,23 +1018,19 @@ class _CheckPainter extends CustomPainter {
     final paint = Paint()
       ..isAntiAlias = false
       ..color = color;
-    for (final (x, y) in const [
-      (2, 6),
-      (3, 7),
-      (4, 8),
-      (5, 7),
-      (6, 6),
-      (7, 5),
-      (8, 4),
-      (9, 3),
-      (10, 2),
-    ]) {
+    final count = (_points.length * progress.clamp(0.0, 1.0)).ceil().clamp(
+      0,
+      _points.length,
+    );
+    for (var i = 0; i < count; i++) {
+      final (x, y) = _points[i];
       canvas.drawRect(Rect.fromLTWH(x * unit, y * unit, unit, unit), paint);
     }
   }
 
   @override
-  bool shouldRepaint(_CheckPainter oldDelegate) => oldDelegate.color != color;
+  bool shouldRepaint(_CheckPainter oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.progress != progress;
 }
 
 class PixelSwitch extends StatefulWidget {
@@ -997,7 +1089,9 @@ class _PixelSwitchState extends State<PixelSwitch> {
             alignment: widget.value
                 ? Alignment.centerRight
                 : Alignment.centerLeft,
-            child: Container(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 110),
+              curve: Curves.easeOut,
               width: knob,
               height: knob,
               color: widget.value ? p.ink : p.inkFaint,
@@ -1231,12 +1325,17 @@ class PixelProgressBar extends StatelessWidget {
     return SizedBox(
       height: height,
       width: double.infinity,
-      child: CustomPaint(
-        painter: _ProgressPainter(
-          value: value.clamp(0, 1),
-          border: p.border,
-          track: p.panelAlt,
-          fill: color ?? p.gold,
+      child: TweenAnimationBuilder<double>(
+        tween: Tween<double>(end: value.clamp(0.0, 1.0).toDouble()),
+        duration: const Duration(milliseconds: 260),
+        curve: Curves.easeOutCubic,
+        builder: (context, animated, _) => CustomPaint(
+          painter: _ProgressPainter(
+            value: animated,
+            border: p.border,
+            track: p.panelAlt,
+            fill: color ?? p.gold,
+          ),
         ),
       ),
     );
@@ -1443,7 +1542,7 @@ class PixelCallout extends StatelessWidget {
   }
 }
 
-class PixelLink extends StatelessWidget {
+class PixelLink extends StatefulWidget {
   const PixelLink(this.label, {super.key, this.onTap, this.color});
 
   final String label;
@@ -1451,18 +1550,26 @@ class PixelLink extends StatelessWidget {
   final Color? color;
 
   @override
+  State<PixelLink> createState() => _PixelLinkState();
+}
+
+class _PixelLinkState extends State<PixelLink> {
+  bool _hover = false;
+
+  @override
   Widget build(BuildContext context) {
     final p = PixelPalette.of(context);
-    final c = color ?? p.link;
+    final c = _hover ? p.goldDeep : (widget.color ?? p.link);
     return Semantics(
       link: true,
       child: InkWell(
-        onTap: onTap,
+        onTap: widget.onTap,
+        onHover: (v) => setState(() => _hover = v),
         mouseCursor: SystemMouseCursors.click,
         hoverColor: Colors.transparent,
         splashFactory: NoSplash.splashFactory,
-        child: Text(
-          label,
+        child: AnimatedDefaultTextStyle(
+          duration: const Duration(milliseconds: 100),
           style: TextStyle(
             fontFamily: PixelFont.family,
             fontFamilyFallback: PixelFont.fallback,
@@ -1471,6 +1578,7 @@ class PixelLink extends StatelessWidget {
             decoration: TextDecoration.underline,
             decorationColor: c.withValues(alpha: 0.45),
           ),
+          child: Text(widget.label),
         ),
       ),
     );
@@ -1516,7 +1624,9 @@ class _PixelExpansionState extends State<PixelExpansion> {
           mouseCursor: SystemMouseCursors.click,
           hoverColor: Colors.transparent,
           splashFactory: NoSplash.splashFactory,
-          child: Container(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 90),
+            curve: Curves.easeOut,
             color: _hover ? p.goldSoft : (widget.headerColor ?? p.panelAlt),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             child: Row(
@@ -1604,7 +1714,9 @@ class PixelTabs extends StatelessWidget {
       mouseCursor: SystemMouseCursors.click,
       hoverColor: Colors.transparent,
       splashFactory: NoSplash.splashFactory,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 120),
+        curve: Curves.easeOut,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: selectedNow ? p.panel : Colors.transparent,
@@ -1635,8 +1747,8 @@ class PixelTabs extends StatelessWidget {
               ),
               const SizedBox(width: 6),
             ],
-            Text(
-              tabs[i].label,
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 120),
               style: TextStyle(
                 fontFamily: PixelFont.family,
                 fontFamilyFallback: PixelFont.fallback,
@@ -1645,6 +1757,7 @@ class PixelTabs extends StatelessWidget {
                 fontWeight: FontWeight.w700,
                 color: selectedNow ? p.ink : p.inkSoft,
               ),
+              child: Text(tabs[i].label),
             ),
           ],
         ),
@@ -1808,11 +1921,13 @@ Future<T?> showPixelDialog<T>({
   double maxWidth = 460,
   bool barrierDismissible = true,
 }) {
-  return showDialog<T>(
+  return showGeneralDialog<T>(
     context: context,
     barrierDismissible: barrierDismissible,
     barrierColor: Colors.black54,
-    builder: (dialogContext) => PixelDialog(
+    barrierLabel: '关闭对话框',
+    transitionDuration: const Duration(milliseconds: 160),
+    pageBuilder: (dialogContext, animation, secondaryAnimation) => PixelDialog(
       title: title,
       subtitle: subtitle,
       icon: icon,
@@ -1821,6 +1936,19 @@ Future<T?> showPixelDialog<T>({
       actions: actions,
       child: child,
     ),
+    transitionBuilder: (context, animation, secondaryAnimation, child) {
+      final curved = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOutCubic,
+      );
+      return FadeTransition(
+        opacity: curved,
+        child: ScaleTransition(
+          scale: Tween<double>(begin: 0.96, end: 1).animate(curved),
+          child: child,
+        ),
+      );
+    },
   );
 }
 

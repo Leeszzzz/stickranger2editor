@@ -22,6 +22,33 @@ String formatInt(int v) {
 
 const tabularFigures = [FontFeature.tabularFigures()];
 
+/// 数值变化时做一次短促的计数过渡。
+class AnimatedNumberText extends StatelessWidget {
+  const AnimatedNumberText({
+    super.key,
+    required this.value,
+    this.formatter,
+    this.style,
+  });
+
+  final int value;
+  final String Function(int)? formatter;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(end: value.toDouble()),
+      duration: const Duration(milliseconds: 420),
+      curve: Curves.easeOutCubic,
+      builder: (context, animated, _) => Text(
+        formatter?.call(animated.round()) ?? '${animated.round()}',
+        style: style,
+      ),
+    );
+  }
+}
+
 /// 大数值统计卡：像素面板 + 硬投影 + 可点击编辑。
 class StatCard extends StatefulWidget {
   const StatCard({
@@ -32,6 +59,8 @@ class StatCard extends StatefulWidget {
     required this.color,
     this.max,
     this.onTap,
+    this.numericValue,
+    this.formatter,
   });
 
   final String label;
@@ -40,6 +69,8 @@ class StatCard extends StatefulWidget {
   final Color color;
   final String? max;
   final VoidCallback? onTap;
+  final int? numericValue;
+  final String Function(int)? formatter;
 
   @override
   State<StatCard> createState() => _StatCardState();
@@ -52,6 +83,15 @@ class _StatCardState extends State<StatCard> {
   Widget build(BuildContext context) {
     final p = PixelPalette.of(context);
     final theme = Theme.of(context);
+    final valueStyle = TextStyle(
+      fontFamily: PixelFont.family,
+      fontFamilyFallback: PixelFont.fallback,
+      fontSize: PixelSize.value,
+      height: 1.05,
+      fontWeight: FontWeight.w700,
+      fontFeatures: tabularFigures,
+      color: widget.color,
+    );
     return InkWell(
       onTap: widget.onTap,
       onHover: widget.onTap == null ? null : (v) => setState(() => _hover = v),
@@ -61,7 +101,13 @@ class _StatCardState extends State<StatCard> {
       hoverColor: Colors.transparent,
       splashFactory: NoSplash.splashFactory,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 90),
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeOut,
+        transform: Matrix4.translationValues(
+          _hover ? -2 : 0,
+          _hover ? -2 : 0,
+          0,
+        ),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: _hover ? p.panelAlt : p.panel,
@@ -72,7 +118,7 @@ class _StatCardState extends State<StatCard> {
           boxShadow: [
             BoxShadow(
               color: p.shadow,
-              offset: const Offset(4, 4),
+              offset: Offset(_hover ? 6 : 4, _hover ? 6 : 4),
               blurRadius: 0,
             ),
           ],
@@ -108,18 +154,14 @@ class _StatCardState extends State<StatCard> {
               ],
             ),
             const SizedBox(height: 12),
-            Text(
-              widget.value,
-              style: TextStyle(
-                fontFamily: PixelFont.family,
-                fontFamilyFallback: PixelFont.fallback,
-                fontSize: PixelSize.value,
-                height: 1.05,
-                fontWeight: FontWeight.w700,
-                fontFeatures: tabularFigures,
-                color: widget.color,
-              ),
-            ),
+            if (widget.numericValue != null)
+              AnimatedNumberText(
+                value: widget.numericValue!,
+                formatter: widget.formatter ?? formatInt,
+                style: valueStyle,
+              )
+            else
+              Text(widget.value, style: valueStyle),
             if (widget.max != null) ...[
               const SizedBox(height: 4),
               Text(
@@ -264,8 +306,9 @@ class NumberField extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  Text(
-                    formatInt(value),
+                  AnimatedNumberText(
+                    value: value,
+                    formatter: formatInt,
                     style: TextStyle(
                       fontFamily: PixelFont.family,
                       fontFamilyFallback: PixelFont.fallback,
@@ -327,25 +370,32 @@ class EmptyState extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  width: 96,
-                  height: 96,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: p.panelAlt,
-                    border: Border.all(
-                      color: p.border,
-                      width: PixelSize.border,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: p.shadow,
-                        offset: const Offset(4, 4),
-                        blurRadius: 0,
+                TweenAnimationBuilder<double>(
+                  tween: Tween<double>(begin: 0.92, end: 1),
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOutBack,
+                  builder: (context, scale, child) =>
+                      Transform.scale(scale: scale, child: child),
+                  child: Container(
+                    width: 96,
+                    height: 96,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: p.panelAlt,
+                      border: Border.all(
+                        color: p.border,
+                        width: PixelSize.border,
                       ),
-                    ],
+                      boxShadow: [
+                        BoxShadow(
+                          color: p.shadow,
+                          offset: const Offset(4, 4),
+                          blurRadius: 0,
+                        ),
+                      ],
+                    ),
+                    child: PixelGlyph(icon, size: 64),
                   ),
-                  child: PixelGlyph(icon, size: 64),
                 ),
                 const SizedBox(height: 18),
                 Text(

@@ -65,7 +65,7 @@ class AppShell extends StatelessWidget {
         builder: (context, _) {
           final index = deps.navIndex.value.clamp(0, _destinations.length - 1);
 
-          final content = IndexedStack(
+          final content = PixelPageSwitcher(
             index: index,
             children: [
               for (final d in _destinations)
@@ -305,11 +305,24 @@ class _ThemeMenu extends StatelessWidget {
               color: p.topBar,
               border: Border.all(color: p.topBarSoft, width: 2),
             ),
-            child: PixelGlyph(
-              icon,
-              size: 16,
-              color: p.topBarInk,
-              accent: p.gold,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 140),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeIn,
+              transitionBuilder: (child, animation) => FadeTransition(
+                opacity: animation,
+                child: ScaleTransition(
+                  scale: Tween<double>(begin: 0.8, end: 1).animate(animation),
+                  child: child,
+                ),
+              ),
+              child: PixelGlyph(
+                icon,
+                key: ValueKey(icon),
+                size: 16,
+                color: p.topBarInk,
+                accent: p.gold,
+              ),
             ),
           ),
         );
@@ -564,24 +577,29 @@ class _NavItemState extends State<_NavItem> {
         ),
         child: Row(
           children: [
-            Container(
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 120),
+              curve: Curves.easeOut,
               width: 4,
               height: 38,
               color: selected ? p.gold : Colors.transparent,
             ),
             const SizedBox(width: 8),
-            PixelGlyph(
-              widget.destination.icon,
-              size: 16,
-              color: selected ? p.gold : p.inkSoft,
-              accent: selected ? p.gold : p.inkSoft,
+            AnimatedSlide(
+              offset: selected || _hover ? const Offset(0.08, 0) : Offset.zero,
+              duration: const Duration(milliseconds: 110),
+              curve: Curves.easeOut,
+              child: PixelGlyph(
+                widget.destination.icon,
+                size: 16,
+                color: selected ? p.gold : p.inkSoft,
+                accent: selected ? p.gold : p.inkSoft,
+              ),
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(
-                widget.destination.label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              child: AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 110),
                 style: TextStyle(
                   fontFamily: PixelFont.family,
                   fontFamilyFallback: PixelFont.fallback,
@@ -589,6 +607,11 @@ class _NavItemState extends State<_NavItem> {
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.3,
                   color: fg,
+                ),
+                child: Text(
+                  widget.destination.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ),
@@ -655,7 +678,7 @@ class _BottomNav extends StatelessWidget {
   }
 }
 
-class _BottomItem extends StatelessWidget {
+class _BottomItem extends StatefulWidget {
   const _BottomItem({
     required this.destination,
     required this.selected,
@@ -667,15 +690,29 @@ class _BottomItem extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
+  State<_BottomItem> createState() => _BottomItemState();
+}
+
+class _BottomItemState extends State<_BottomItem> {
+  bool _hover = false;
+
+  @override
   Widget build(BuildContext context) {
     final p = PixelPalette.of(context);
+    final selected = widget.selected;
     return InkWell(
-      onTap: onTap,
+      onTap: widget.onTap,
+      onHover: (v) => setState(() => _hover = v),
       mouseCursor: SystemMouseCursors.click,
       hoverColor: Colors.transparent,
       splashFactory: NoSplash.splashFactory,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 120),
+        curve: Curves.easeOut,
         decoration: BoxDecoration(
+          color: _hover && !selected
+              ? p.goldSoft.withValues(alpha: 0.5)
+              : Colors.transparent,
           border: Border(
             top: BorderSide(
               color: selected ? p.gold : Colors.transparent,
@@ -686,15 +723,20 @@ class _BottomItem extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            PixelGlyph(
-              destination.icon,
-              size: 16,
-              color: selected ? p.goldDeep : p.inkSoft,
-              accent: selected ? p.gold : p.inkSoft,
+            AnimatedSlide(
+              offset: selected ? const Offset(0, -0.08) : Offset.zero,
+              duration: const Duration(milliseconds: 140),
+              curve: Curves.easeOutCubic,
+              child: PixelGlyph(
+                widget.destination.icon,
+                size: 16,
+                color: selected ? p.goldDeep : p.inkSoft,
+                accent: selected ? p.gold : p.inkSoft,
+              ),
             ),
             const SizedBox(height: 4),
-            Text(
-              destination.shortLabel,
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 120),
               style: TextStyle(
                 fontFamily: PixelFont.family,
                 fontFamilyFallback: PixelFont.fallback,
@@ -703,6 +745,7 @@ class _BottomItem extends StatelessWidget {
                 fontWeight: FontWeight.w700,
                 color: selected ? p.ink : p.inkSoft,
               ),
+              child: Text(widget.destination.shortLabel),
             ),
           ],
         ),

@@ -458,14 +458,18 @@ class _InventoryRowState extends State<_InventoryRow> {
       hoverColor: Colors.transparent,
       splashFactory: NoSplash.splashFactory,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 70),
+        duration: const Duration(milliseconds: 90),
+        curve: Curves.easeOut,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
         decoration: BoxDecoration(
           color: _hover
               ? p.goldSoft
               : (count > 0 ? p.panel : p.panel.withValues(alpha: 0.72)),
           border: Border(
-            left: BorderSide(color: p.border, width: PixelSize.border),
+            left: BorderSide(
+              color: _hover ? p.gold : p.border,
+              width: PixelSize.border,
+            ),
             right: BorderSide(color: p.border, width: PixelSize.border),
             bottom: BorderSide(
               color: p.border,
@@ -475,7 +479,16 @@ class _InventoryRowState extends State<_InventoryRow> {
         ),
         child: Row(
           children: [
-            ItemIcon(catalog: catalog, itemId: widget.itemId, size: 36),
+            AnimatedSlide(
+              offset: _hover ? const Offset(0.05, 0) : Offset.zero,
+              duration: const Duration(milliseconds: 90),
+              curve: Curves.easeOut,
+              child: ItemIcon(
+                catalog: catalog,
+                itemId: widget.itemId,
+                size: 36,
+              ),
+            ),
             const SizedBox(width: 10),
             Expanded(
               flex: 4,

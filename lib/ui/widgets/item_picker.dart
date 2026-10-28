@@ -194,7 +194,9 @@ class _ItemTileState extends State<_ItemTile> {
       hoverColor: Colors.transparent,
       splashFactory: NoSplash.splashFactory,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 70),
+        duration: const Duration(milliseconds: 90),
+        curve: Curves.easeOut,
+        transform: Matrix4.translationValues(0, _hover ? -1 : 0, 0),
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
         decoration: BoxDecoration(
           color: _hover ? p.goldSoft : p.paperAlt,
