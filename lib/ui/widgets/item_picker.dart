@@ -39,7 +39,6 @@ Future<int?> showItemPicker(
     context: context,
     title: title,
     icon: PixelIcons.bag,
-    subtitle: slot == null ? '检索物品数据库' : '只显示可放入「${slot.label}」的物品',
     maxWidth: 680,
     child: _ItemPickerBody(catalog: catalog, slot: slot),
     actions: [
@@ -202,8 +201,8 @@ class _ItemTileState extends State<_ItemTile> {
         transform: Matrix4.translationValues(0, _hover ? -1 : 0, 0),
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
         decoration: BoxDecoration(
-          color: _hover ? p.goldSoft : p.paperAlt,
-          border: Border.all(color: _hover ? p.gold : p.border, width: 1),
+          color: _hover ? p.accentSoft : p.paperAlt,
+          border: Border.all(color: _hover ? p.accent : p.border, width: 1),
         ),
         child: Row(
           children: [

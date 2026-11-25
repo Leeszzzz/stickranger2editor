@@ -1,7 +1,7 @@
-/// 像素百科（pixel wiki）设计系统。
+/// 像素方块（blocky pixel）设计系统。
 ///
-/// 视觉语言：旧游戏手册 / 攻略本的纸张底色、2px 墨线边框、硬投影、
-/// 12px 像素字体（Fusion Pixel）与 12 的整数倍标题字号。
+/// 视觉语言：泰拉瑞亚地表 —— 土棕为主色，苔绿作强调，草绿随机洒在土壤表面；
+/// 2px 墨线边框、硬投影、12px 像素字体（Fusion Pixel）与 12 的整数倍标题字号。
 library;
 
 import 'package:flutter/material.dart';
@@ -36,9 +36,9 @@ class PixelPalette extends ThemeExtension<PixelPalette> {
     required this.inkFaint,
     required this.border,
     required this.shadow,
-    required this.gold,
-    required this.goldDeep,
-    required this.goldSoft,
+    required this.accent,
+    required this.accentDeep,
+    required this.accentSoft,
     required this.link,
     required this.danger,
     required this.success,
@@ -76,14 +76,14 @@ class PixelPalette extends ThemeExtension<PixelPalette> {
   /// 硬投影。
   final Color shadow;
 
-  /// 金色强调（填充）。
-  final Color gold;
+  /// 苔绿强调（填充）：草方块顶面。
+  final Color accent;
 
-  /// 金色强调（可读文字）。
-  final Color goldDeep;
+  /// 苔绿强调（可读文字）：深草绿。
+  final Color accentDeep;
 
-  /// 金色浅底。
-  final Color goldSoft;
+  /// 苔绿浅底：草叶高光。
+  final Color accentSoft;
 
   /// 百科链接蓝。
   final Color link;
@@ -101,49 +101,49 @@ class PixelPalette extends ThemeExtension<PixelPalette> {
   final Color selection;
 
   static const light = PixelPalette(
-    paper: Color(0xFFE7DCC2),
-    paperAlt: Color(0xFFF1E8D2),
-    panel: Color(0xFFFAF3E2),
-    panelAlt: Color(0xFFEDE3CB),
-    ink: Color(0xFF2A2118),
-    inkSoft: Color(0xFF6C5A43),
-    inkFaint: Color(0xFFA49273),
-    border: Color(0xFF3B2E22),
-    shadow: Color(0x662A2118),
-    gold: Color(0xFFC98F2E),
-    goldDeep: Color(0xFF855710),
-    goldSoft: Color(0xFFF2D99B),
+    paper: Color(0xFFC9B99A),
+    paperAlt: Color(0xFFDCCCB0),
+    panel: Color(0xFFE8DCC0),
+    panelAlt: Color(0xFFD6C5A6),
+    ink: Color(0xFF2E2318),
+    inkSoft: Color(0xFF6B5540),
+    inkFaint: Color(0xFF9C8768),
+    border: Color(0xFF3A2E1E),
+    shadow: Color(0x66201308),
+    accent: Color(0xFF5C9A3F),
+    accentDeep: Color(0xFF356B22),
+    accentSoft: Color(0xFFA8CE84),
     link: Color(0xFF2F638D),
     danger: Color(0xFFA83E30),
     success: Color(0xFF4E7C3C),
     info: Color(0xFF3D708F),
-    topBar: Color(0xFF241C14),
-    topBarInk: Color(0xFFF3E9D0),
-    topBarSoft: Color(0xFFB7A27C),
-    selection: Color(0x55C98F2E),
+    topBar: Color(0xFF2A3B1C),
+    topBarInk: Color(0xFFF0E8D4),
+    topBarSoft: Color(0xFF9BAF7E),
+    selection: Color(0x555C9A3F),
   );
 
   static const dark = PixelPalette(
-    paper: Color(0xFF16130F),
-    paperAlt: Color(0xFF1F1B15),
-    panel: Color(0xFF26211A),
-    panelAlt: Color(0xFF2E281F),
-    ink: Color(0xFFEADFC7),
-    inkSoft: Color(0xFFB5A586),
-    inkFaint: Color(0xFF7F7159),
-    border: Color(0xFF6F6048),
+    paper: Color(0xFF14100B),
+    paperAlt: Color(0xFF1D1811),
+    panel: Color(0xFF251E16),
+    panelAlt: Color(0xFF302719),
+    ink: Color(0xFFEDE3CB),
+    inkSoft: Color(0xFFBAA886),
+    inkFaint: Color(0xFF827154),
+    border: Color(0xFF6B573A),
     shadow: Color(0xCC000000),
-    gold: Color(0xFFE3AF55),
-    goldDeep: Color(0xFFF0C77C),
-    goldSoft: Color(0xFF4A3A1F),
+    accent: Color(0xFF7CB342),
+    accentDeep: Color(0xFFA5D46A),
+    accentSoft: Color(0xFF33431F),
     link: Color(0xFF89BFE5),
     danger: Color(0xFFE07A6A),
     success: Color(0xFF93C77F),
     info: Color(0xFF80B7D4),
-    topBar: Color(0xFF0E0C09),
-    topBarInk: Color(0xFFF3E9D0),
-    topBarSoft: Color(0xFFA08D6C),
-    selection: Color(0x55E3AF55),
+    topBar: Color(0xFF101508),
+    topBarInk: Color(0xFFEDE3CB),
+    topBarSoft: Color(0xFF8A9A6A),
+    selection: Color(0x557CB342),
   );
 
   static PixelPalette of(BuildContext context) =>
@@ -160,9 +160,9 @@ class PixelPalette extends ThemeExtension<PixelPalette> {
     Color? inkFaint,
     Color? border,
     Color? shadow,
-    Color? gold,
-    Color? goldDeep,
-    Color? goldSoft,
+    Color? accent,
+    Color? accentDeep,
+    Color? accentSoft,
     Color? link,
     Color? danger,
     Color? success,
@@ -182,9 +182,9 @@ class PixelPalette extends ThemeExtension<PixelPalette> {
       inkFaint: inkFaint ?? this.inkFaint,
       border: border ?? this.border,
       shadow: shadow ?? this.shadow,
-      gold: gold ?? this.gold,
-      goldDeep: goldDeep ?? this.goldDeep,
-      goldSoft: goldSoft ?? this.goldSoft,
+      accent: accent ?? this.accent,
+      accentDeep: accentDeep ?? this.accentDeep,
+      accentSoft: accentSoft ?? this.accentSoft,
       link: link ?? this.link,
       danger: danger ?? this.danger,
       success: success ?? this.success,
@@ -210,9 +210,9 @@ class PixelPalette extends ThemeExtension<PixelPalette> {
       inkFaint: mix(inkFaint, other.inkFaint),
       border: mix(border, other.border),
       shadow: mix(shadow, other.shadow),
-      gold: mix(gold, other.gold),
-      goldDeep: mix(goldDeep, other.goldDeep),
-      goldSoft: mix(goldSoft, other.goldSoft),
+      accent: mix(accent, other.accent),
+      accentDeep: mix(accentDeep, other.accentDeep),
+      accentSoft: mix(accentSoft, other.accentSoft),
       link: mix(link, other.link),
       danger: mix(danger, other.danger),
       success: mix(success, other.success),
@@ -280,17 +280,17 @@ abstract final class PixelTheme {
 
   static ThemeData _build(Brightness brightness, PixelPalette p) {
     final base = ColorScheme.fromSeed(
-      seedColor: p.gold,
+      seedColor: p.accent,
       brightness: brightness,
     );
     final scheme = base.copyWith(
       primary: p.ink,
       onPrimary: p.panel,
-      primaryContainer: p.goldSoft,
+      primaryContainer: p.accentSoft,
       onPrimaryContainer: p.ink,
-      secondary: p.goldDeep,
+      secondary: p.accentDeep,
       onSecondary: p.panel,
-      secondaryContainer: p.goldSoft,
+      secondaryContainer: p.accentSoft,
       onSecondaryContainer: p.ink,
       tertiary: p.link,
       onTertiary: p.panel,
@@ -308,7 +308,7 @@ abstract final class PixelTheme {
       scrim: Colors.black54,
       inverseSurface: p.ink,
       onInverseSurface: p.paper,
-      inversePrimary: p.gold,
+      inversePrimary: p.accent,
       surfaceTint: Colors.transparent,
     );
 
@@ -336,7 +336,7 @@ abstract final class PixelTheme {
       splashFactory: NoSplash.splashFactory,
       highlightColor: Colors.transparent,
       hoverColor: p.paperAlt,
-      focusColor: p.gold.withValues(alpha: 0.16),
+      focusColor: p.accent.withValues(alpha: 0.16),
       visualDensity: VisualDensity.standard,
       materialTapTargetSize: MaterialTapTargetSize.padded,
       extensions: [p],
@@ -378,7 +378,7 @@ abstract final class PixelTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.zero,
-          borderSide: BorderSide(color: p.gold, width: PixelSize.border),
+          borderSide: BorderSide(color: p.accent, width: PixelSize.border),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.zero,
@@ -390,9 +390,9 @@ abstract final class PixelTheme {
         ),
       ),
       textSelectionTheme: TextSelectionThemeData(
-        cursorColor: p.goldDeep,
+        cursorColor: p.accentDeep,
         selectionColor: p.selection,
-        selectionHandleColor: p.goldDeep,
+        selectionHandleColor: p.accentDeep,
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: Colors.transparent,
@@ -405,12 +405,12 @@ abstract final class PixelTheme {
       snackBarTheme: SnackBarThemeData(
         backgroundColor: p.ink,
         contentTextStyle: textTheme.bodyMedium?.copyWith(color: p.panel),
-        actionTextColor: p.gold,
+        actionTextColor: p.accent,
         elevation: 0,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.zero,
-          side: BorderSide(color: p.gold, width: PixelSize.border),
+          side: BorderSide(color: p.accent, width: PixelSize.border),
         ),
         insetPadding: const EdgeInsets.all(16),
       ),
@@ -443,23 +443,23 @@ abstract final class PixelTheme {
         labelStyle: textTheme.titleSmall,
         unselectedLabelStyle: textTheme.bodyMedium,
         indicator: BoxDecoration(
-          border: Border(bottom: BorderSide(color: p.gold, width: 4)),
+          border: Border(bottom: BorderSide(color: p.accent, width: 4)),
         ),
         dividerColor: Colors.transparent,
-        overlayColor: WidgetStatePropertyAll(p.gold.withValues(alpha: 0.1)),
+        overlayColor: WidgetStatePropertyAll(p.accent.withValues(alpha: 0.1)),
         splashFactory: NoSplash.splashFactory,
       ),
       sliderTheme: SliderThemeData(
         trackHeight: 10,
-        activeTrackColor: p.gold,
+        activeTrackColor: p.accent,
         inactiveTrackColor: p.panelAlt,
         disabledActiveTrackColor: p.inkFaint,
         disabledInactiveTrackColor: p.paperAlt,
         thumbColor: p.ink,
-        overlayColor: p.gold.withValues(alpha: 0.14),
+        overlayColor: p.accent.withValues(alpha: 0.14),
         overlayShape: const RoundSliderOverlayShape(overlayRadius: 18),
         tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 1.5),
-        activeTickMarkColor: p.goldSoft,
+        activeTickMarkColor: p.accentSoft,
         inactiveTickMarkColor: p.inkFaint,
         valueIndicatorColor: p.ink,
         valueIndicatorTextStyle: textTheme.bodyMedium?.copyWith(color: p.panel),
@@ -471,7 +471,7 @@ abstract final class PixelTheme {
         ),
         trackColor: WidgetStateProperty.resolveWith(
           (states) =>
-              states.contains(WidgetState.selected) ? p.gold : p.panelAlt,
+              states.contains(WidgetState.selected) ? p.accent : p.panelAlt,
         ),
         trackOutlineColor: WidgetStatePropertyAll(p.border),
         trackOutlineWidth: const WidgetStatePropertyAll(PixelSize.border),
@@ -505,7 +505,7 @@ abstract final class PixelTheme {
         surfaceTintColor: Colors.transparent,
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
-        color: p.gold,
+        color: p.accent,
         linearTrackColor: p.panelAlt,
         linearMinHeight: 8,
         refreshBackgroundColor: p.paperAlt,
@@ -532,7 +532,7 @@ abstract final class PixelTheme {
         decoration: BoxDecoration(
           color: p.ink,
           borderRadius: BorderRadius.zero,
-          border: Border.all(color: p.gold, width: PixelSize.border),
+          border: Border.all(color: p.accent, width: PixelSize.border),
         ),
         textStyle: textTheme.bodySmall?.copyWith(color: p.panel),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),

@@ -7,10 +7,8 @@ import '../../theme/pixel_theme.dart';
 import '../widgets/common.dart';
 import '../widgets/pixel_icons.dart';
 import '../widgets/pixel_kit.dart';
+import '../widgets/save_actions.dart';
 
-/// 与仓库 ranger2_decoder.py 内置示例一致的测试存档。
-const kSampleSave =
-    'akY97ss*CrEFUKYWLCbHNVgaM9TKjvXfIBkXYmx45yRs16AbEQLriOHU7XxE13rAFrOBtNUlFJnn6uI4woiHiexuMRXDw1xxHIQSPR9YL9ckJ*W9wW8XD8Dz8d4q9jyEPPcQo8TTIjPwbeedI.2SWlyvqAJdh6rBXBW6nYD0btmFmvHyS068UEugqvvjQxq2lIlFfejCuD22lCW.fldPZ*ilvcUjzQG4zzKWOmz0Yo.nzEQXP.fu92NUhf8Vdk3iTJt02FRJ0R8KYf*JkX6I4KCe8qMS0OjxMiL3MSBoPoSEhHDu.9qDchyDA2PAjKhA1AtGqjH*sexsgC4*Jgui.RZ1uxBnlPpgx5c7dZHGENJ61c3IpdUw7DwbjVkBKLwrKWQ2uQjyBzFQyL4586Pz1ArMVTgfrTHget30thk.wBujV2xhvaUvD.aWyK4y84ewSpFJzlRexEYH02CRvPXIQnfU';
 
 class SaveScreen extends StatefulWidget {
   const SaveScreen({super.key});
@@ -54,14 +52,13 @@ class _SaveScreenState extends State<SaveScreen> {
     setState(() => _input.text = text);
   }
 
-  void _export(EditorController controller) {
-    final s = controller.encode();
+  Future<void> _export(EditorController controller) async {
+    final s = await exportSaveWithDialog(context);
     if (s == null) return;
     setState(() {
       _output.text = s;
       _exported = true;
     });
-    showAppSnackBar(context, '已生成新存档');
   }
 
   @override
@@ -74,17 +71,9 @@ class _SaveScreenState extends State<SaveScreen> {
           padding: const EdgeInsets.fromLTRB(20, 20, 24, 40),
           children: [
             WikiPageHeader(
-              title: '存档工坊',
-              breadcrumb: const ['SR2 EDITOR', '存档工坊'],
+              title: '导入/导出',
+              breadcrumb: const ['SR2 EDITOR', '导入/导出'],
               icon: PixelIcons.save,
-              subtitle:
-                  '导入、修改并重新编码 Stick Ranger 2 的存档字符串。'
-                  '解码会校验尾部校验和与数据校验和，导出时自动重算。',
-              tags: const [
-                PixelBadge('离线解码', tone: PixelBadgeTone.success, dot: true),
-                PixelBadge('768 个 6-bit 值', tone: PixelBadgeTone.neutral),
-                PixelBadge('重编码导出', tone: PixelBadgeTone.gold),
-              ],
             ),
             _StatusStrip(controller: controller, onUnload: _unload),
             const SizedBox(height: 16),
@@ -174,8 +163,8 @@ class _StatusStrip extends StatelessWidget {
           final icon = PixelGlyph(
             loaded ? PixelIcons.check : PixelIcons.warning,
             size: 16,
-            color: loaded ? p.success : p.goldDeep,
-            accent: loaded ? p.success : p.gold,
+            color: loaded ? p.success : p.accentDeep,
+            accent: loaded ? p.success : p.accent,
           );
           final text = Text(
             loaded
@@ -266,9 +255,8 @@ class _ImportPanel extends StatelessWidget {
     final p = PixelPalette.of(context);
     return PixelPanel(
       title: '① 导入存档',
-      subtitle: '在游戏中点击 EXPORT 复制存档字符串，粘贴到下方后解析',
       icon: PixelIcons.download,
-      accent: p.gold,
+      accent: p.accent,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -335,9 +323,8 @@ class _ExportPanel extends StatelessWidget {
     final p = PixelPalette.of(context);
     return PixelPanel(
       title: '② 导出存档',
-      subtitle: '在其他页面编辑存档后生成新存档',
       icon: PixelIcons.upload,
-      accent: p.gold,
+      accent: p.accent,
       trailing: PixelButton(
         label: '生成新存档',
         icon: PixelIcons.spark,
@@ -382,7 +369,7 @@ class _ExportPanel extends StatelessWidget {
             PixelCallout(
               message: '修改存档前请务必备份原始字符串，编辑风险自负。',
               icon: PixelIcons.warning,
-              tone: PixelBadgeTone.gold,
+              tone: PixelBadgeTone.accent,
             ),
           ],
         ],
@@ -403,7 +390,7 @@ class _ArchiveInfobox extends StatelessWidget {
     return PixelPanel(
       title: '存档档案',
       icon: PixelIcons.book,
-      accent: p.gold,
+      accent: p.accent,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -433,7 +420,7 @@ class _ArchiveInfobox extends StatelessWidget {
                 '金币',
                 loaded ? formatInt(controller.gold) : '—',
                 mono: true,
-                valueColor: p.goldDeep,
+                valueColor: p.accentDeep,
               ),
               PixelInfoRow(
                 '等级',

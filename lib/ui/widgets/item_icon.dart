@@ -105,7 +105,7 @@ class ItemIcon extends StatelessWidget {
       'Weapon' => p.danger,
       'Skill' => p.link,
       'Hat' => p.success,
-      'Ring' => p.gold,
+      'Ring' => p.accent,
       'Amulet' => p.info,
       _ => p.inkSoft,
     };

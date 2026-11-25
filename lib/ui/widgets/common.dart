@@ -112,7 +112,7 @@ class _StatCardState extends State<StatCard> {
         decoration: BoxDecoration(
           color: _hover ? p.panelAlt : p.panel,
           border: Border.all(
-            color: _hover ? p.gold : p.border,
+            color: _hover ? p.accent : p.border,
             width: PixelSize.border,
           ),
           boxShadow: [
@@ -148,7 +148,7 @@ class _StatCardState extends State<StatCard> {
                   Text(
                     _hover ? '编辑 →' : '编辑',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: _hover ? p.goldDeep : p.inkFaint,
+                      color: _hover ? p.accentDeep : p.inkFaint,
                     ),
                   ),
               ],
@@ -284,7 +284,7 @@ class NumberField extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final p = PixelPalette.of(context);
-    final accent = color ?? p.goldDeep;
+    final accent = color ?? p.accentDeep;
     return InkWell(
       onTap: () => _showDialog(context),
       mouseCursor: SystemMouseCursors.click,
@@ -401,7 +401,7 @@ class EmptyState extends StatelessWidget {
                 Text(
                   'NO DATA',
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: p.goldDeep,
+                    color: p.accentDeep,
                     letterSpacing: 3,
                   ),
                 ),

@@ -8,6 +8,7 @@ import '../../theme/pixel_theme.dart';
 import '../widgets/common.dart';
 import '../widgets/pixel_icons.dart';
 import '../widgets/pixel_kit.dart';
+import '../widgets/save_actions.dart';
 
 class OverviewScreen extends StatelessWidget {
   const OverviewScreen({super.key});
@@ -73,9 +74,9 @@ class OverviewScreen extends StatelessWidget {
     if (!controller.hasSave) {
       return EmptyState(
         icon: PixelIcons.grid,
-        message: '先在「存档工坊」解析存档字符串，\n这里会显示金币 / 经验 / 等级与档案总览。',
-        actionLabel: '去载入存档',
-        onAction: () => AppDeps.of(context).navIndex.value = 0,
+        message: '先在「导入/导出」解析存档字符串，\n这里会显示金币 / 经验 / 等级与档案总览。',
+        actionLabel: '导入存档',
+        onAction: () => importSaveWithDialog(context),
       );
     }
 
@@ -103,9 +104,6 @@ class OverviewScreen extends StatelessWidget {
               title: '总览',
               breadcrumb: const ['SR2 EDITOR', '总览'],
               icon: PixelIcons.grid,
-              subtitle:
-                  '当前存档的角色等级、资源与攻略进度一览。'
-                  '点击数值卡可直接修改，批量操作会立即写入内存中的存档。',
               tags: [
                 PixelBadge(
                   'User ID ${controller.userId}',
@@ -115,8 +113,10 @@ class OverviewScreen extends StatelessWidget {
                   '${controller.partyCount} 人队伍',
                   tone: PixelBadgeTone.link,
                 ),
-                PixelBadge(catalog.sourceLabel, tone: PixelBadgeTone.gold),
+                PixelBadge(catalog.sourceLabel, tone: PixelBadgeTone.accent),
               ],
+            
+              actions: const [SaveQuickActions()],
             ),
             LayoutBuilder(
               builder: (context, constraints) {
@@ -196,7 +196,7 @@ class _StatGrid extends StatelessWidget {
         numericValue: controller.gold,
         formatter: formatInt,
         icon: PixelIcons.coin,
-        color: p.goldDeep,
+        color: p.accentDeep,
         max: formatInt(EditorController.maxGold),
         onTap: () => onEdit(
           '设置金币',
@@ -276,9 +276,8 @@ class _PartyPanel extends StatelessWidget {
     final p = PixelPalette.of(context);
     return PixelPanel(
       title: '队伍编成',
-      subtitle: '队伍人数 1 — 4；角色详情请前往「角色档案」',
       icon: PixelIcons.dice,
-      accent: p.gold,
+      accent: p.accent,
       trailing: PixelBadge(
         '${controller.partyCount} 人',
         tone: PixelBadgeTone.ink,
@@ -315,9 +314,8 @@ class _ProgressPanel extends StatelessWidget {
     final p = PixelPalette.of(context);
     return PixelPanel(
       title: '进度概览',
-      subtitle: '只统计当前存档中的标记值，可在「进度档案」逐项调整',
       icon: PixelIcons.trophy,
-      accent: p.gold,
+      accent: p.accent,
       child: Column(
         children: [
           _ProgressRow(
@@ -331,7 +329,7 @@ class _ProgressPanel extends StatelessWidget {
             label: '成就完成',
             value: achievements,
             total: 128,
-            color: p.gold,
+            color: p.accent,
           ),
           const SizedBox(height: 12),
           _ProgressRow(label: '勋章解锁', value: medals, total: 10, color: p.link),
@@ -404,9 +402,8 @@ class _QuickActions extends StatelessWidget {
     final p = PixelPalette.of(context);
     return PixelPanel(
       title: '快捷操作',
-      subtitle: '批量修改立即生效，导出前可随时在对应页面微调',
       icon: PixelIcons.spark,
-      accent: p.gold,
+      accent: p.accent,
       child: Wrap(
         spacing: 8,
         runSpacing: 8,
@@ -414,7 +411,7 @@ class _QuickActions extends StatelessWidget {
           PixelButton(
             label: '金币拉满',
             icon: PixelIcons.coin,
-            tone: PixelButtonTone.gold,
+            tone: PixelButtonTone.accent,
             onPressed: () {
               controller.setGold(EditorController.maxGold);
               showAppSnackBar(context, '金币已拉满');
@@ -482,7 +479,7 @@ class _ArchiveInfobox extends StatelessWidget {
     return PixelPanel(
       title: '存档档案',
       icon: PixelIcons.book,
-      accent: p.gold,
+      accent: p.accent,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -494,7 +491,7 @@ class _ArchiveInfobox extends StatelessWidget {
                 '金币',
                 formatInt(controller.gold),
                 mono: true,
-                valueColor: p.goldDeep,
+                valueColor: p.accentDeep,
               ),
               PixelInfoRow(
                 '经验',
@@ -507,12 +504,6 @@ class _ArchiveInfobox extends StatelessWidget {
               PixelInfoRow('持有物品', '${controller.itemsTotal} 种', mono: true),
               PixelInfoRow('技能点合计', '$sp', mono: true),
             ],
-          ),
-          const SizedBox(height: 10),
-          PixelCallout(
-            message: '数值上限由存档的 6-bit 位域决定：金币 / 经验 16,777,215，等级 99。',
-            icon: PixelIcons.info,
-            tone: PixelBadgeTone.link,
           ),
         ],
       ),

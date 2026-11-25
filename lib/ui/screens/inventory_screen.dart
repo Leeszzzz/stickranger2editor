@@ -8,6 +8,7 @@ import '../widgets/common.dart';
 import '../widgets/item_icon.dart';
 import '../widgets/pixel_icons.dart';
 import '../widgets/pixel_kit.dart';
+import '../widgets/save_actions.dart';
 
 const List<String> _categoryChips = [
   '全部',
@@ -60,8 +61,8 @@ class _InventoryScreenState extends State<InventoryScreen> {
       return EmptyState(
         icon: PixelIcons.bag,
         message: '载入存档后即可编辑 256 格背包。\n物品以等级记录，0 级表示未获取。',
-        actionLabel: '去载入存档',
-        onAction: () => AppDeps.of(context).navIndex.value = 0,
+        actionLabel: '导入存档',
+        onAction: () => importSaveWithDialog(context),
       );
     }
 
@@ -82,13 +83,10 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   title: '物品数据库',
                   breadcrumb: const ['SR2 EDITOR', '物品数据库'],
                   icon: PixelIcons.bag,
-                  subtitle:
-                      '256 格背包的完整索引。所有物品以等级记录：'
-                      '0 级表示未获取，1 级及以上表示当前等级。',
                   tags: [
                     PixelBadge(
                       '持有 ${controller.itemsTotal} 种',
-                      tone: PixelBadgeTone.gold,
+                      tone: PixelBadgeTone.accent,
                     ),
                     PixelBadge(
                       '数据库 ${controller.catalog.itemCount} 种',
@@ -96,6 +94,8 @@ class _InventoryScreenState extends State<InventoryScreen> {
                     ),
                     const PixelBadge('256 格', tone: PixelBadgeTone.link),
                   ],
+                
+                  actions: const [SaveQuickActions()],
                 ),
               ),
             ),
@@ -463,11 +463,11 @@ class _InventoryRowState extends State<_InventoryRow> {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
         decoration: BoxDecoration(
           color: _hover
-              ? p.goldSoft
+              ? p.accentSoft
               : (count > 0 ? p.panel : p.panel.withValues(alpha: 0.72)),
           border: Border(
             left: BorderSide(
-              color: _hover ? p.gold : p.border,
+              color: _hover ? p.accent : p.border,
               width: PixelSize.border,
             ),
             right: BorderSide(color: p.border, width: PixelSize.border),
@@ -593,7 +593,7 @@ class _CountStepper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = PixelPalette.of(context);
-    final accent = count > 0 ? p.goldDeep : p.inkFaint;
+    final accent = count > 0 ? p.accentDeep : p.inkFaint;
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
@@ -661,7 +661,7 @@ class _ItemSheet extends StatelessWidget {
                       InfoBadge('#$itemId'),
                       PixelBadge(
                         catalog.categoryLabel(itemId),
-                        tone: PixelBadgeTone.gold,
+                        tone: PixelBadgeTone.accent,
                       ),
                       const PixelBadge('等级语义', tone: PixelBadgeTone.link),
                     ],
@@ -739,7 +739,7 @@ class _ItemSheet extends StatelessWidget {
                             fontFamilyFallback: PixelFont.fallback,
                             fontSize: PixelSize.valueCompact,
                             fontWeight: FontWeight.w700,
-                            color: v > 0 ? p.goldDeep : p.inkFaint,
+                            color: v > 0 ? p.accentDeep : p.inkFaint,
                           ),
                         ),
                       ),
@@ -767,7 +767,7 @@ class _ItemSheet extends StatelessWidget {
                         label: '设为 63 级',
                         icon: PixelIcons.chevronUp,
                         size: PixelButtonSize.small,
-                        tone: PixelButtonTone.gold,
+                        tone: PixelButtonTone.accent,
                         onPressed: () => controller.setItemCount(itemId, 63),
                       ),
                       PixelButton(
@@ -802,7 +802,7 @@ class _Legend extends StatelessWidget {
       dense: true,
       child: Row(
         children: [
-          PixelGlyph(PixelIcons.info, size: 16, color: p.link, accent: p.gold),
+          PixelGlyph(PixelIcons.info, size: 16, color: p.link, accent: p.accent),
           const SizedBox(width: 8),
           Expanded(
             child: Text(

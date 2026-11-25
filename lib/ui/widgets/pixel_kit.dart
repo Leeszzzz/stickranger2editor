@@ -19,7 +19,10 @@ abstract final class PixelLayout {
   static const gutterCompact = 12.0;
 }
 
-/// 页面底纹：旧纸网格 + 稀疏抖动点。
+/// 页面底纹：纯泥土底色 + 极淡的土粒与碎石。
+///
+/// 草皮不画在背景上 —— 它属于「每个面板的横切面」（见 [PixelGrassEdge]），
+/// 背景只提供土壤质感，保证正文阅读时不被图案干扰。
 class PixelPaperBackground extends StatelessWidget {
   const PixelPaperBackground({super.key, required this.child});
 
@@ -29,59 +32,61 @@ class PixelPaperBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = PixelPalette.of(context);
     return CustomPaint(
-      painter: _PaperPainter(
+      painter: _SoilPainter(
         base: p.paper,
-        grid: p.ink.withValues(alpha: 0.035),
-        dot: p.ink.withValues(alpha: 0.055),
+        soilDark: Color.lerp(p.paper, p.border, 0.06)!,
+        soilLight: Color.lerp(p.paper, Colors.white, 0.06)!,
       ),
       child: child,
     );
   }
 }
 
-class _PaperPainter extends CustomPainter {
-  const _PaperPainter({
+class _SoilPainter extends CustomPainter {
+  const _SoilPainter({
     required this.base,
-    required this.grid,
-    required this.dot,
+    required this.soilDark,
+    required this.soilLight,
   });
 
   final Color base;
-  final Color grid;
-  final Color dot;
+  final Color soilDark;
+  final Color soilLight;
+
+  /// 确定性伪随机，保证同一位置图案稳定，不随重绘跳动。
+  int _hash(int x, int y, int salt) {
+    var h = x * 73856093 ^ y * 19349663 ^ salt * 83492791;
+    h = (h ^ (h >> 13)) * 1274126177;
+    return (h ^ (h >> 16)) & 0x7fffffff;
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..isAntiAlias = false;
     canvas.drawRect(Offset.zero & size, paint..color = base);
 
-    paint
-      ..color = grid
-      ..style = PaintingStyle.fill;
-    for (var x = 0.0; x < size.width; x += 24) {
-      canvas.drawRect(Rect.fromLTWH(x, 0, 1, size.height), paint);
-    }
-    for (var y = 0.0; y < size.height; y += 24) {
-      canvas.drawRect(Rect.fromLTWH(0, y, size.width, 1), paint);
-    }
-
-    paint.color = dot;
-    const step = 48.0;
-    for (var y = 0.0; y < size.height; y += step) {
-      for (var x = 0.0; x < size.width; x += step) {
-        final ix = (x / step).round();
-        final iy = (y / step).round();
-        if ((ix * 7 + iy * 13) % 5 != 0) continue;
-        canvas.drawRect(Rect.fromLTWH(x + 14, y + 26, 2, 2), paint);
+    // 4px 网格上稀疏撒土粒，对比极低，只为避免大面积纯色显得扁平。
+    const cell = 4.0;
+    final cols = (size.width / cell).ceil() + 1;
+    final rows = (size.height / cell).ceil() + 1;
+    for (var gy = 0; gy < rows; gy++) {
+      for (var gx = 0; gx < cols; gx++) {
+        final r = _hash(gx, gy, 7);
+        if (r % 17 != 0) continue;
+        paint.color = (r >> 3) % 2 == 0 ? soilDark : soilLight;
+        canvas.drawRect(
+          Rect.fromLTWH(gx * cell, gy * cell, cell, cell),
+          paint,
+        );
       }
     }
   }
 
   @override
-  bool shouldRepaint(_PaperPainter oldDelegate) =>
+  bool shouldRepaint(_SoilPainter oldDelegate) =>
       oldDelegate.base != base ||
-      oldDelegate.grid != grid ||
-      oldDelegate.dot != dot;
+      oldDelegate.soilDark != soilDark ||
+      oldDelegate.soilLight != soilLight;
 }
 
 /// 页面 / 页签切换时的淡入与轻微上移。
@@ -139,6 +144,100 @@ class PixelPageSwitcher extends StatelessWidget {
 // ============================================================================
 
 /// 像素面板：2px 墨线 + 4px 硬投影 + 可选表头。
+/// 草方块横切面的顶部草皮：一条参差的绿色草脊。
+///
+/// 每 12px 一列，列高在 2..7px 间由确定性伪随机决定，形成锯齿状起伏；
+/// 草脊下方再压 2px 深的草根色，模拟草皮与泥土的交界。
+/// 宽度随父容器铺满，因此直接放在面板标题栏的最上方即可。
+class PixelGrassEdge extends StatelessWidget {
+  const PixelGrassEdge({
+    super.key,
+    this.height = 8,
+    this.seed = 0,
+  });
+
+  /// 草脊可达的最大高度（实际每列在此范围内起伏）。
+  final double height;
+
+  /// 每个面板可用不同 seed 让草脊形态各异，避免整齐重复。
+  final int seed;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = PixelPalette.of(context);
+    return SizedBox(
+      height: height,
+      width: double.infinity,
+      child: CustomPaint(
+        painter: _GrassEdgePainter(
+          // 草色向面板底色靠拢，避免在土色界面上过于跳出。
+          top: Color.lerp(p.accent, p.panelAlt, 0.28)!,
+          light: Color.lerp(p.accent, Colors.white, 0.10)!,
+          root: Color.lerp(p.accentDeep, p.panelAlt, 0.55)!,
+          seed: seed,
+        ),
+      ),
+    );
+  }
+}
+
+class _GrassEdgePainter extends CustomPainter {
+  const _GrassEdgePainter({
+    required this.top,
+    required this.light,
+    required this.root,
+    required this.seed,
+  });
+
+  final Color top;
+  final Color light;
+  final Color root;
+  final int seed;
+
+  int _hash(int x, int salt) {
+    var h = x * 374761393 ^ salt * 668265263 ^ seed * 2147483647;
+    h = (h ^ (h >> 13)) * 1274126177;
+    return (h ^ (h >> 16)) & 0x7fffffff;
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..isAntiAlias = false;
+    const colW = 4.0;
+    final cols = (size.width / colW).ceil();
+    // 档位总数：整条高度按 colW 切分，草能在 1..maxSteps 档之间起伏。
+    final maxSteps = (size.height / colW).floor().clamp(1, 6);
+
+    // 草方块横切面：顶部齐平的草皮，底缘按列参差下垂。
+    for (var i = 0; i < cols; i++) {
+      final r = _hash(i, 1);
+      // 每列草皮厚度在 maxSteps 档内变化，相邻列自然形成锯齿。
+      final steps = 1 + (r % maxSteps);
+      final depth = (steps * colW).clamp(colW, size.height);
+
+      final x = i * colW;
+      // 从顶部 0 开始向下填充，顶部对齐、底部参差
+      paint.color = top;
+      canvas.drawRect(Rect.fromLTWH(x, 0, colW, depth), paint);
+
+      // 每列底缘压 2px 深色，作为草皮与泥土的交界线
+      paint.color = root;
+      canvas.drawRect(Rect.fromLTWH(x, depth - 2, colW, 2), paint);
+    }
+
+    // 整体顶面提亮 2px，模拟草皮受光的上表面
+    paint.color = light;
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, 2), paint);
+  }
+
+  @override
+  bool shouldRepaint(_GrassEdgePainter oldDelegate) =>
+      oldDelegate.top != top ||
+      oldDelegate.light != light ||
+      oldDelegate.root != root ||
+      oldDelegate.seed != seed;
+}
+
 class PixelPanel extends StatelessWidget {
   const PixelPanel({
     super.key,
@@ -155,6 +254,8 @@ class PixelPanel extends StatelessWidget {
     this.bodyColor,
     this.borderColor,
     this.dense = false,
+    this.grassTop = true,
+    this.grassSeed,
   });
 
   final Widget child;
@@ -171,14 +272,34 @@ class PixelPanel extends StatelessWidget {
   final Color? borderColor;
   final bool dense;
 
+  /// 是否在标题栏顶部绘制草皮（草方块横切面）。无标题的面板不绘制。
+  final bool grassTop;
+
+  /// 草脊形态种子；为 null 时按标题文本自动派生，保证各面板草长势不同
+  /// 但同一面板在重建时保持一致。
+  final int? grassSeed;
+
+  int get _resolvedGrassSeed {
+    final manual = grassSeed;
+    if (manual != null) return manual;
+    final t = title;
+    if (t == null) return 0;
+    var h = 0;
+    for (var i = 0; i < t.length; i++) {
+      h = (h * 31 + t.codeUnitAt(i)) & 0x7fffffff;
+    }
+    return h;
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = PixelPalette.of(context);
     final border = borderColor ?? p.border;
     final hasHeader = title != null;
+    final body = bodyColor ?? p.panel;
     return Container(
       decoration: BoxDecoration(
-        color: bodyColor ?? p.panel,
+        color: body,
         border: Border.all(color: border, width: PixelSize.border),
         boxShadow: shadow
             ? [
@@ -193,6 +314,27 @@ class PixelPanel extends StatelessWidget {
               ]
             : null,
       ),
+      // 左上内高光 + 右下内阴影：模拟方块受光的斜面，比纯平面更有体积。
+      foregroundDecoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(
+            color: Color.lerp(body, Colors.white, 0.30)!,
+            width: 2,
+          ),
+          left: BorderSide(
+            color: Color.lerp(body, Colors.white, 0.30)!,
+            width: 2,
+          ),
+          bottom: BorderSide(
+            color: Color.lerp(body, border, 0.34)!,
+            width: 2,
+          ),
+          right: BorderSide(
+            color: Color.lerp(body, border, 0.34)!,
+            width: 2,
+          ),
+        ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
@@ -205,13 +347,20 @@ class PixelPanel extends StatelessWidget {
                   bottom: BorderSide(color: border, width: PixelSize.border),
                 ),
               ),
-              padding: EdgeInsets.fromLTRB(
-                10,
-                dense ? 6 : 8,
-                trailing == null ? 10 : 6,
-                dense ? 6 : 8,
-              ),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (grassTop)
+                    PixelGrassEdge(height: 12, seed: _resolvedGrassSeed),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      10,
+                      dense ? 6 : 8,
+                      trailing == null ? 10 : 6,
+                      dense ? 6 : 8,
+                    ),
+                    child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   if (accent != null) ...[
@@ -254,6 +403,9 @@ class PixelPanel extends StatelessWidget {
                     const SizedBox(width: 8),
                     trailing!,
                   ],
+                ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -384,7 +536,7 @@ class PixelRule extends StatelessWidget {
       height: 4,
       child: Row(
         children: [
-          Container(width: width, height: 4, color: color ?? p.gold),
+          Container(width: width, height: 4, color: color ?? p.accent),
           const SizedBox(width: 8),
           Expanded(
             child: Align(
@@ -410,7 +562,7 @@ class PixelSectionLabel extends StatelessWidget {
     final p = PixelPalette.of(context);
     return Row(
       children: [
-        Container(width: 4, height: 12, color: p.gold),
+        Container(width: 4, height: 12, color: p.accent),
         const SizedBox(width: 6),
         Text(
           label,
@@ -429,7 +581,7 @@ class PixelSectionLabel extends StatelessWidget {
 // 按钮 / 标签
 // ============================================================================
 
-enum PixelButtonTone { primary, secondary, ghost, danger, gold }
+enum PixelButtonTone { primary, secondary, ghost, danger, accent }
 
 enum PixelButtonSize { small, regular, large }
 
@@ -546,7 +698,7 @@ class _PixelButtonState extends State<PixelButton> {
         decoration: BoxDecoration(
           color: bg,
           border: Border.all(
-            color: _focus ? p.gold : border,
+            color: _focus ? p.accent : border,
             width: PixelSize.border,
           ),
           boxShadow: _enabled && !_pressed
@@ -595,13 +747,13 @@ class _PixelButtonState extends State<PixelButton> {
   (Color, Color, Color) _colors(PixelPalette p) {
     switch (widget.tone) {
       case PixelButtonTone.primary:
-        return _hover ? (p.ink, p.gold, p.gold) : (p.ink, p.panel, p.border);
+        return _hover ? (p.ink, p.accent, p.accent) : (p.ink, p.panel, p.border);
       case PixelButtonTone.danger:
         return _hover
-            ? (p.danger, p.panel, p.gold)
+            ? (p.danger, p.panel, p.accent)
             : (p.danger, p.panel, p.border);
-      case PixelButtonTone.gold:
-        return _hover ? (p.gold, p.ink, p.ink) : (p.goldSoft, p.ink, p.border);
+      case PixelButtonTone.accent:
+        return _hover ? (p.accent, p.ink, p.ink) : (p.accentSoft, p.ink, p.border);
       case PixelButtonTone.ghost:
         return (
           _hover ? p.paperAlt : Colors.transparent,
@@ -609,7 +761,7 @@ class _PixelButtonState extends State<PixelButton> {
           _hover ? p.inkFaint : Colors.transparent,
         );
       case PixelButtonTone.secondary:
-        return (_hover ? p.goldSoft : p.panel, p.ink, p.border);
+        return (_hover ? p.accentSoft : p.panel, p.ink, p.border);
     }
   }
 }
@@ -644,7 +796,7 @@ class PixelIconButton extends StatelessWidget {
   }
 }
 
-enum PixelBadgeTone { neutral, gold, link, danger, success, ink }
+enum PixelBadgeTone { neutral, accent, link, danger, success, ink }
 
 class PixelBadge extends StatelessWidget {
   const PixelBadge(
@@ -664,7 +816,7 @@ class PixelBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = PixelPalette.of(context);
     final (fg, bg, border) = switch (tone) {
-      PixelBadgeTone.gold => (p.goldDeep, p.goldSoft, p.goldDeep),
+      PixelBadgeTone.accent => (p.accentDeep, p.accentSoft, p.accentDeep),
       PixelBadgeTone.link => (p.link, p.panel, p.link),
       PixelBadgeTone.danger => (p.danger, p.panel, p.danger),
       PixelBadgeTone.success => (p.success, p.panel, p.success),
@@ -718,7 +870,7 @@ class PixelDivider extends StatelessWidget {
       size: const Size(double.infinity, 8),
       painter: _DashedRulePainter(
         color: color ?? p.border.withValues(alpha: 0.55),
-        diamond: p.gold,
+        diamond: p.accent,
       ),
     );
   }
@@ -778,7 +930,7 @@ class _PixelChipState extends State<PixelChip> {
   Widget build(BuildContext context) {
     final p = PixelPalette.of(context);
     final fg = widget.selected ? p.panel : p.ink;
-    final bg = widget.selected ? p.ink : (_hover ? p.goldSoft : p.panel);
+    final bg = widget.selected ? p.ink : (_hover ? p.accentSoft : p.panel);
     final border = widget.selected || _hover ? p.ink : p.border;
     return InkWell(
       onTap: widget.onTap,
@@ -899,7 +1051,7 @@ class PixelSegmented<T> extends StatelessWidget {
                       s.icon!,
                       size: 16,
                       color: isSelected ? p.panel : p.ink,
-                      accent: isSelected ? p.gold : p.gold,
+                      accent: isSelected ? p.accent : p.accent,
                     ),
                     const SizedBox(width: 5),
                   ],
@@ -977,7 +1129,7 @@ class _PixelCheckboxState extends State<PixelCheckbox> {
           decoration: BoxDecoration(
             color: widget.value ? p.ink : p.panel,
             border: Border.all(
-              color: _hover ? p.gold : p.border,
+              color: _hover ? p.accent : p.border,
               width: PixelSize.border,
             ),
           ),
@@ -1077,7 +1229,7 @@ class _PixelSwitchState extends State<PixelSwitch> {
           height: widget.height,
           padding: const EdgeInsets.all(2),
           decoration: BoxDecoration(
-            color: widget.value ? p.gold : p.panelAlt,
+            color: widget.value ? p.accent : p.panelAlt,
             border: Border.all(
               color: _hover ? p.ink : p.border,
               width: PixelSize.border,
@@ -1133,13 +1285,13 @@ class PixelSlider extends StatelessWidget {
         trackHeight: 10,
         trackShape: _PixelTrackShape(
           border: p.border,
-          active: color ?? p.gold,
+          active: color ?? p.accent,
           inactive: p.panelAlt,
         ),
-        thumbShape: _PixelThumbShape(border: p.ink, fill: color ?? p.gold),
+        thumbShape: _PixelThumbShape(border: p.ink, fill: color ?? p.accent),
         overlayShape: SliderComponentShape.noOverlay,
         tickMarkShape: _PixelTickMarkShape(color: p.inkFaint),
-        activeTickMarkColor: p.goldSoft,
+        activeTickMarkColor: p.accentSoft,
         inactiveTickMarkColor: p.inkFaint,
       ),
       child: SizedBox(
@@ -1334,7 +1486,7 @@ class PixelProgressBar extends StatelessWidget {
             value: animated,
             border: p.border,
             track: p.panelAlt,
-            fill: color ?? p.gold,
+            fill: color ?? p.accent,
           ),
         ),
       ),
@@ -1487,7 +1639,7 @@ class PixelCallout extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = PixelPalette.of(context);
     final accent = switch (tone) {
-      PixelBadgeTone.gold => p.goldDeep,
+      PixelBadgeTone.accent => p.accentDeep,
       PixelBadgeTone.link => p.link,
       PixelBadgeTone.danger => p.danger,
       PixelBadgeTone.success => p.success,
@@ -1559,7 +1711,7 @@ class _PixelLinkState extends State<PixelLink> {
   @override
   Widget build(BuildContext context) {
     final p = PixelPalette.of(context);
-    final c = _hover ? p.goldDeep : (widget.color ?? p.link);
+    final c = _hover ? p.accentDeep : (widget.color ?? p.link);
     return Semantics(
       link: true,
       child: InkWell(
@@ -1627,7 +1779,7 @@ class _PixelExpansionState extends State<PixelExpansion> {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 90),
             curve: Curves.easeOut,
-            color: _hover ? p.goldSoft : (widget.headerColor ?? p.panelAlt),
+            color: _hover ? p.accentSoft : (widget.headerColor ?? p.panelAlt),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             child: Row(
               children: [
@@ -1722,7 +1874,7 @@ class PixelTabs extends StatelessWidget {
           color: selectedNow ? p.panel : Colors.transparent,
           border: Border(
             top: BorderSide(
-              color: selectedNow ? p.gold : Colors.transparent,
+              color: selectedNow ? p.accent : Colors.transparent,
               width: 3,
             ),
             left: BorderSide(
@@ -1976,7 +2128,7 @@ Future<T?> showPixelSheet<T>({
           decoration: BoxDecoration(
             color: p.paper,
             border: Border(
-              top: BorderSide(color: p.gold, width: 4),
+              top: BorderSide(color: p.accent, width: 4),
               left: BorderSide(color: p.border, width: 2),
               right: BorderSide(color: p.border, width: 2),
             ),
@@ -2025,7 +2177,7 @@ void showPixelToast(
         margin: const EdgeInsets.all(16),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.zero,
-          side: BorderSide(color: p.gold, width: PixelSize.border),
+          side: BorderSide(color: p.accent, width: PixelSize.border),
         ),
         content: Row(
           children: [
@@ -2033,7 +2185,7 @@ void showPixelToast(
               icon ?? (error ? PixelIcons.warning : PixelIcons.check),
               size: 16,
               color: p.panel,
-              accent: p.gold,
+              accent: p.accent,
             ),
             const SizedBox(width: 8),
             Expanded(

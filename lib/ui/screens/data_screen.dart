@@ -11,6 +11,7 @@ import '../../theme/pixel_theme.dart';
 import '../widgets/common.dart';
 import '../widgets/pixel_icons.dart';
 import '../widgets/pixel_kit.dart';
+import '../widgets/save_actions.dart';
 
 const _gameJsUrl = 'https://dan-ball.jp/en/javagame/ranger2/ranger2.js';
 
@@ -162,14 +163,11 @@ class _DataScreenState extends State<DataScreen> {
               title: '数据源',
               breadcrumb: const ['SR2 EDITOR', '数据源'],
               icon: PixelIcons.book,
-              subtitle:
-                  '物品 / 关卡 / 成就 / 勋章的本地目录。可从 dan-ball.jp 拉取最新的 '
-                  'ranger2.js 重新解析，结果保存在本机，随时可恢复内置数据。',
               tags: [
                 PixelBadge(
                   '来源：${catalog.sourceLabel}',
                   tone: isOverride
-                      ? PixelBadgeTone.gold
+                      ? PixelBadgeTone.accent
                       : PixelBadgeTone.neutral,
                 ),
                 if (isOverride && deps.repository.updatedAtLabel != null)
@@ -183,6 +181,8 @@ class _DataScreenState extends State<DataScreen> {
                   dot: true,
                 ),
               ],
+            
+              actions: const [SaveQuickActions()],
             ),
             LayoutBuilder(
               builder: (context, constraints) {
@@ -239,7 +239,7 @@ class _DataOverviewPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = PixelPalette.of(context);
     final entries = [
-      ('物品', '${catalog.itemCount} 种', PixelIcons.bag, p.goldDeep),
+      ('物品', '${catalog.itemCount} 种', PixelIcons.bag, p.accentDeep),
       ('成就', '${catalog.achievementCount} 项', PixelIcons.trophy, p.link),
       ('关卡', '${catalog.stages.length - 1} 个', PixelIcons.map, p.success),
       ('勋章', '${catalog.medals.length} 枚', PixelIcons.star, p.danger),
@@ -247,7 +247,7 @@ class _DataOverviewPanel extends StatelessWidget {
     return PixelPanel(
       title: '数据概览',
       icon: PixelIcons.grid,
-      accent: p.gold,
+      accent: p.accent,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -339,9 +339,8 @@ class _UpdatePanel extends StatelessWidget {
     final p = PixelPalette.of(context);
     return PixelPanel(
       title: '从官网更新',
-      subtitle: '下载 dan-ball.jp 的 ranger2.js 并重新解析，结果保存在本机',
       icon: PixelIcons.download,
-      accent: p.gold,
+      accent: p.accent,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -368,7 +367,7 @@ class _UpdatePanel extends StatelessWidget {
                 ? 'Web 端受浏览器 CORS 限制，无法直接读取官网数据；请使用 Windows / Android 客户端。'
                 : '更新请求只访问 dan-ball.jp，不会上传存档或任何本地数据。',
             icon: PixelIcons.warning,
-            tone: kIsWeb ? PixelBadgeTone.gold : PixelBadgeTone.neutral,
+            tone: kIsWeb ? PixelBadgeTone.accent : PixelBadgeTone.neutral,
           ),
         ],
       ),
@@ -387,7 +386,7 @@ class _AboutPanel extends StatelessWidget {
     return PixelPanel(
       title: '关于',
       icon: PixelIcons.bookOpen,
-      accent: p.gold,
+      accent: p.accent,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -409,7 +408,7 @@ class _AboutPanel extends StatelessWidget {
           PixelCallout(
             message: '修改存档前请务必备份原始字符串。',
             icon: PixelIcons.warning,
-            tone: PixelBadgeTone.gold,
+            tone: PixelBadgeTone.accent,
           ),
           const SizedBox(height: 12),
           Wrap(
@@ -464,7 +463,7 @@ class _DataInfobox extends StatelessWidget {
     return PixelPanel(
       title: '数据源档案',
       icon: PixelIcons.book,
-      accent: p.gold,
+      accent: p.accent,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -473,7 +472,7 @@ class _DataInfobox extends StatelessWidget {
               PixelInfoRow(
                 '来源',
                 catalog.sourceLabel,
-                valueColor: isOverride ? p.goldDeep : p.ink,
+                valueColor: isOverride ? p.accentDeep : p.ink,
               ),
               if (isOverride && updatedAt != null)
                 PixelInfoRow('更新时间', updatedAt!, mono: true),

@@ -8,6 +8,7 @@ import '../../theme/pixel_theme.dart';
 import '../widgets/common.dart';
 import '../widgets/pixel_icons.dart';
 import '../widgets/pixel_kit.dart';
+import '../widgets/save_actions.dart';
 
 class ProgressScreen extends StatefulWidget {
   const ProgressScreen({super.key});
@@ -35,8 +36,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
       return EmptyState(
         icon: PixelIcons.trophy,
         message: '载入存档后即可编辑关卡 / 成就 / 勋章 /\n图鉴 / 选项与饭团数量。',
-        actionLabel: '去载入存档',
-        onAction: () => AppDeps.of(context).navIndex.value = 0,
+        actionLabel: '导入存档',
+        onAction: () => importSaveWithDialog(context),
       );
     }
 
@@ -62,14 +63,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 title: '进度档案',
                 breadcrumb: const ['SR2 EDITOR', '进度档案'],
                 icon: PixelIcons.trophy,
-                subtitle:
-                    '关卡解锁、128 项成就、10 枚勋章、怪物图鉴与存档选项。'
-                    '所有切换都会立即写入内存，导出时统一编码。',
                 tags: [
                   PixelBadge('关卡 $stages/21', tone: PixelBadgeTone.success),
-                  PixelBadge('成就 $achievements/128', tone: PixelBadgeTone.gold),
+                  PixelBadge('成就 $achievements/128', tone: PixelBadgeTone.accent),
                   PixelBadge('图鉴 $monsters/128', tone: PixelBadgeTone.link),
                 ],
+              
+                actions: const [SaveQuickActions()],
               ),
             ),
             Padding(
@@ -140,7 +140,7 @@ class _StagesTab extends StatelessWidget {
                     label: '全部解锁',
                     icon: PixelIcons.unlock,
                     size: PixelButtonSize.small,
-                    tone: PixelButtonTone.gold,
+                    tone: PixelButtonTone.accent,
                     onPressed: () {
                       controller.unlockAllStages();
                       showAppSnackBar(context, '已解锁全部关卡');
@@ -177,13 +177,6 @@ class _StagesTab extends StatelessWidget {
           ),
           const SizedBox(height: 12),
         ],
-        PixelCallout(
-          message:
-              '存档中共有 32 个关卡标记，本页展示可编辑的 1–21。'
-              '「全部解锁」会写入全部 32 个标记。',
-          icon: PixelIcons.info,
-          tone: PixelBadgeTone.link,
-        ),
       ],
     );
   }
@@ -256,7 +249,7 @@ class _AchievementsTab extends StatelessWidget {
               PixelButton(
                 label: '全部完成',
                 size: PixelButtonSize.small,
-                tone: PixelButtonTone.gold,
+                tone: PixelButtonTone.accent,
                 onPressed: () =>
                     _confirmAll(context, controller, complete: true),
               ),
@@ -288,7 +281,7 @@ class _AchievementsTab extends StatelessWidget {
                       fontFamilyFallback: PixelFont.fallback,
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
-                      color: PixelPalette.of(context).goldDeep,
+                      color: PixelPalette.of(context).accentDeep,
                     ),
                   ),
                 ],
@@ -301,7 +294,6 @@ class _AchievementsTab extends StatelessWidget {
         const SizedBox(height: 12),
         PixelPanel(
           title: '成就列表',
-          subtitle: '按关卡分组，点击行首复选框完成 / 清零',
           icon: PixelIcons.star,
           padding: EdgeInsets.zero,
           child: Column(
@@ -381,7 +373,7 @@ class _AchievementStageGroup extends StatelessWidget {
             child: PixelProgressBar(
               value: ids.isEmpty ? 0 : done / ids.length,
               height: 8,
-              color: done == ids.length ? p.success : p.gold,
+              color: done == ids.length ? p.success : p.accent,
             ),
           ),
           const SizedBox(width: 8),
@@ -439,14 +431,14 @@ class _AchievementRowState extends State<_AchievementRow> {
           color: completed
               ? p.panel
               : (_hover
-                    ? p.goldSoft.withValues(alpha: 0.35)
+                    ? p.accentSoft.withValues(alpha: 0.35)
                     : Colors.transparent),
           border: Border(
             bottom: BorderSide(
               color: p.border.withValues(alpha: widget.last ? 0 : 0.16),
             ),
             left: BorderSide(
-              color: completed || _hover ? p.gold : Colors.transparent,
+              color: completed || _hover ? p.accent : Colors.transparent,
               width: 3,
             ),
           ),
@@ -485,7 +477,7 @@ class _AchievementRowState extends State<_AchievementRow> {
             const SizedBox(width: 6),
             PixelBadge(
               '目标 ${def.targetValue}',
-              tone: completed ? PixelBadgeTone.gold : PixelBadgeTone.neutral,
+              tone: completed ? PixelBadgeTone.accent : PixelBadgeTone.neutral,
             ),
             const SizedBox(width: 8),
             PixelCheckbox(
@@ -538,8 +530,8 @@ class _AchievementMedal extends StatelessWidget {
       content = PixelGlyph(
         PixelIcons.star,
         size: 16,
-        color: completed ? p.goldDeep : p.inkFaint,
-        accent: completed ? p.gold : p.inkFaint,
+        color: completed ? p.accentDeep : p.inkFaint,
+        accent: completed ? p.accent : p.inkFaint,
       );
     }
     return Container(
@@ -547,8 +539,8 @@ class _AchievementMedal extends StatelessWidget {
       height: 30,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: completed ? p.goldSoft : p.paperAlt,
-        border: Border.all(color: completed ? p.goldDeep : p.border, width: 1),
+        color: completed ? p.accentSoft : p.paperAlt,
+        border: Border.all(color: completed ? p.accentDeep : p.border, width: 1),
       ),
       child: content,
     );
@@ -581,7 +573,7 @@ class _MedalsTab extends StatelessWidget {
             label: '全部解锁',
             icon: PixelIcons.unlock,
             size: PixelButtonSize.small,
-            tone: PixelButtonTone.gold,
+            tone: PixelButtonTone.accent,
             onPressed: () {
               controller.unlockAllMedals();
               showAppSnackBar(context, '已解锁全部勋章');
@@ -606,7 +598,7 @@ class _MedalsTab extends StatelessWidget {
                       fontFamilyFallback: PixelFont.fallback,
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
-                      color: p.goldDeep,
+                      color: p.accentDeep,
                     ),
                   ),
                 ],
@@ -662,17 +654,17 @@ class _MedalRow extends StatelessWidget {
             height: 34,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: unlocked ? p.goldSoft : p.paperAlt,
+              color: unlocked ? p.accentSoft : p.paperAlt,
               border: Border.all(
-                color: unlocked ? p.goldDeep : p.border,
+                color: unlocked ? p.accentDeep : p.border,
                 width: PixelSize.border,
               ),
             ),
             child: PixelGlyph(
               PixelIcons.star,
               size: 24,
-              color: unlocked ? p.goldDeep : p.inkFaint,
-              accent: unlocked ? p.gold : p.inkFaint,
+              color: unlocked ? p.accentDeep : p.inkFaint,
+              accent: unlocked ? p.accent : p.inkFaint,
             ),
           ),
           const SizedBox(width: 10),
@@ -724,7 +716,6 @@ class _OnigiriTab extends StatelessWidget {
       children: [
         PixelPanel(
           title: '饭团数量',
-          subtitle: '回血道具的持有数量',
           iconWidget: Container(
             width: 30,
             height: 30,
@@ -746,16 +737,8 @@ class _OnigiriTab extends StatelessWidget {
             min: 0,
             max: 63,
             onChanged: controller.setUsedSp,
-            color: p.goldDeep,
+            color: p.accentDeep,
           ),
-        ),
-        const SizedBox(height: 12),
-        PixelCallout(
-          message:
-              '该值对应存档字段 jb[9]（饭团数量），与技能点无关。'
-              '修改后进入关卡前会显示新的持有数量。',
-          icon: PixelIcons.potion,
-          tone: PixelBadgeTone.gold,
         ),
       ],
     );
@@ -789,7 +772,7 @@ class _MonsterTab extends StatelessWidget {
               label: '全部已查看',
               icon: PixelIcons.eye,
               size: PixelButtonSize.small,
-              tone: PixelButtonTone.gold,
+              tone: PixelButtonTone.accent,
               onPressed: () {
                 controller.viewAllMonsters();
                 showAppSnackBar(context, '已将全部图鉴设为「已查看」');
@@ -874,7 +857,7 @@ class _MonsterTileState extends State<_MonsterTile> {
           color: state == 0 ? p.paperAlt : p.panel,
           border: Border.all(
             color: _hover
-                ? p.gold
+                ? p.accent
                 : (state == 0 ? p.border.withValues(alpha: 0.5) : p.border),
             width: PixelSize.border,
           ),
@@ -946,7 +929,6 @@ class _OptionsTab extends StatelessWidget {
       children: [
         PixelPanel(
           title: '自动移动',
-          subtitle: '每个角色的自动移动开关（mb）',
           icon: PixelIcons.person,
           padding: EdgeInsets.zero,
           child: Column(
@@ -964,7 +946,6 @@ class _OptionsTab extends StatelessWidget {
         const SizedBox(height: 12),
         PixelPanel(
           title: '悬崖停止',
-          subtitle: '遇到悬崖边缘时停止移动（nb）',
           icon: PixelIcons.shield,
           padding: EdgeInsets.zero,
           child: _SwitchRow(
@@ -977,7 +958,6 @@ class _OptionsTab extends StatelessWidget {
         const SizedBox(height: 12),
         PixelPanel(
           title: '关卡事件标记',
-          subtitle: 'rf[0]：关卡 13/16 地形通路 · rf[1]：关卡 19 隐藏区域入口',
           icon: PixelIcons.flag,
           padding: EdgeInsets.zero,
           child: Column(
@@ -992,14 +972,6 @@ class _OptionsTab extends StatelessWidget {
                 ),
             ],
           ),
-        ),
-        const SizedBox(height: 12),
-        PixelCallout(
-          message:
-              '事件标记对应存档末尾的 rf 数组，仅部分关卡使用；'
-              '不确定作用时建议保持原值。',
-          icon: PixelIcons.info,
-          tone: PixelBadgeTone.neutral,
         ),
       ],
     );

@@ -47,3 +47,33 @@ app.*.map.json
 
 # DevTools 本地配置
 devtools_options.yaml
+
+# 构建产物与发布包（release/ 位于上层仓库，这里防止误拷贝进本仓库）
+*.apk
+*.aab
+*.ipa
+*.zip
+/release/
+
+# Android 签名材料，绝不入库
+*.jks
+*.keystore
+key.properties
+android/key.properties
+
+# 本地工具依赖
+node_modules/
+
+# 临时文件与本地调试输出
+*.tmp
+*.bak
+*.orig
+/scratch/
+.tmp/
+
+# 本地协作规范（仅保留在本地，不入库）
+AGENTS.md
+CLAUDE.md
+
+# golden 测试失败产物
+test/failures/

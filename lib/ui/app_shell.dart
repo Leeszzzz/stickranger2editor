@@ -28,7 +28,7 @@ class AppShell extends StatelessWidget {
   const AppShell({super.key});
 
   static final List<NavDestination> _destinations = [
-    NavDestination('存档工坊', '存档', PixelIcons.save, (_) => const SaveScreen()),
+    NavDestination('导入/导出', '存档', PixelIcons.save, (_) => const SaveScreen()),
     NavDestination('总览', '总览', PixelIcons.grid, (_) => const OverviewScreen()),
     NavDestination(
       '角色档案',
@@ -137,7 +137,7 @@ class _TopBar extends StatelessWidget {
         padding: EdgeInsets.only(top: topInset),
         decoration: BoxDecoration(
           color: p.topBar,
-          border: Border(bottom: BorderSide(color: p.gold, width: 4)),
+          border: Border(bottom: BorderSide(color: p.accent, width: 4)),
           boxShadow: [
             BoxShadow(
               color: p.shadow,
@@ -164,7 +164,7 @@ class _TopBar extends StatelessWidget {
                     PixelIcons.logo,
                     size: compact ? 24 : 32,
                     color: p.topBarInk,
-                    accent: p.gold,
+                    accent: p.accent,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -321,7 +321,7 @@ class _ThemeMenu extends StatelessWidget {
                 key: ValueKey(icon),
                 size: 16,
                 color: p.topBarInk,
-                accent: p.gold,
+                accent: p.accent,
               ),
             ),
           ),
@@ -347,8 +347,8 @@ class _ThemeMenu extends StatelessWidget {
           PixelGlyph(
             icon,
             size: 16,
-            color: selected ? p.goldDeep : p.inkSoft,
-            accent: selected ? p.gold : p.inkSoft,
+            color: selected ? p.accentDeep : p.inkSoft,
+            accent: selected ? p.accent : p.inkSoft,
           ),
           const SizedBox(width: 8),
           Text(
@@ -363,7 +363,7 @@ class _ThemeMenu extends StatelessWidget {
           ),
           const Spacer(),
           if (selected)
-            PixelGlyph(PixelIcons.check, size: 16, color: p.goldDeep),
+            PixelGlyph(PixelIcons.check, size: 16, color: p.accentDeep),
         ],
       ),
     );
@@ -494,7 +494,7 @@ class _Sidebar extends StatelessWidget {
                       PixelIcons.info,
                       size: 16,
                       color: p.inkFaint,
-                      accent: p.gold,
+                      accent: p.accent,
                     ),
                     const SizedBox(width: 6),
                     Expanded(
@@ -569,7 +569,7 @@ class _NavItemState extends State<_NavItem> {
         duration: const Duration(milliseconds: 80),
         height: 38,
         decoration: BoxDecoration(
-          color: selected ? p.ink : (_hover ? p.goldSoft : Colors.transparent),
+          color: selected ? p.ink : (_hover ? p.accentSoft : Colors.transparent),
           border: Border.all(
             color: selected ? p.ink : Colors.transparent,
             width: 2,
@@ -582,7 +582,7 @@ class _NavItemState extends State<_NavItem> {
               curve: Curves.easeOut,
               width: 4,
               height: 38,
-              color: selected ? p.gold : Colors.transparent,
+              color: selected ? p.accent : Colors.transparent,
             ),
             const SizedBox(width: 8),
             AnimatedSlide(
@@ -592,8 +592,8 @@ class _NavItemState extends State<_NavItem> {
               child: PixelGlyph(
                 widget.destination.icon,
                 size: 16,
-                color: selected ? p.gold : p.inkSoft,
-                accent: selected ? p.gold : p.inkSoft,
+                color: selected ? p.accent : p.inkSoft,
+                accent: selected ? p.accent : p.inkSoft,
               ),
             ),
             const SizedBox(width: 8),
@@ -711,11 +711,11 @@ class _BottomItemState extends State<_BottomItem> {
         curve: Curves.easeOut,
         decoration: BoxDecoration(
           color: _hover && !selected
-              ? p.goldSoft.withValues(alpha: 0.5)
+              ? p.accentSoft.withValues(alpha: 0.5)
               : Colors.transparent,
           border: Border(
             top: BorderSide(
-              color: selected ? p.gold : Colors.transparent,
+              color: selected ? p.accent : Colors.transparent,
               width: 3,
             ),
           ),
@@ -730,8 +730,8 @@ class _BottomItemState extends State<_BottomItem> {
               child: PixelGlyph(
                 widget.destination.icon,
                 size: 16,
-                color: selected ? p.goldDeep : p.inkSoft,
-                accent: selected ? p.gold : p.inkSoft,
+                color: selected ? p.accentDeep : p.inkSoft,
+                accent: selected ? p.accent : p.inkSoft,
               ),
             ),
             const SizedBox(height: 4),

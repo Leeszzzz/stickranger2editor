@@ -10,6 +10,7 @@ import '../widgets/item_icon.dart';
 import '../widgets/item_picker.dart';
 import '../widgets/pixel_icons.dart';
 import '../widgets/pixel_kit.dart';
+import '../widgets/save_actions.dart';
 
 /// 属性加点（wb）7 个方向，闪避上限 25，其余 196（游戏 `gg()` 硬约束）。
 const List<(String, int)> weaponStatMeta = [
@@ -46,8 +47,8 @@ class _CharactersScreenState extends State<CharactersScreen> {
       return EmptyState(
         icon: PixelIcons.person,
         message: '载入存档后即可编辑 4 名角色的\n技能点 / HP / 属性加点 / 装备。',
-        actionLabel: '去载入存档',
-        onAction: () => AppDeps.of(context).navIndex.value = 0,
+        actionLabel: '导入存档',
+        onAction: () => importSaveWithDialog(context),
       );
     }
 
@@ -61,9 +62,6 @@ class _CharactersScreenState extends State<CharactersScreen> {
               title: '角色档案',
               breadcrumb: const ['SR2 EDITOR', '角色档案'],
               icon: PixelIcons.person,
-              subtitle:
-                  '4 名角色的技能点、当前 HP、7 项属性加点与 5 个装备槽。'
-                  '装备槽会按槽位过滤物品，长按槽位可清空。',
               tags: [
                 PixelBadge(
                   '角色 ${_char + 1}',
@@ -79,6 +77,8 @@ class _CharactersScreenState extends State<CharactersScreen> {
                   tone: PixelBadgeTone.link,
                 ),
               ],
+            
+              actions: const [SaveQuickActions()],
             ),
             PixelTabs(
               selected: _char,
@@ -143,15 +143,6 @@ class _CharactersScreenState extends State<CharactersScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-            PixelCallout(
-              message:
-                  '属性加点上限：近战 / 中程 / 远程 / 物理 / 元素 / 未知 为 196，'
-                  '闪避为 25。修改会立即写入内存，导出时统一编码。',
-              icon: PixelIcons.info,
-              tone: PixelBadgeTone.link,
-              title: '加点规则',
-            ),
           ],
         ),
       ),
@@ -171,7 +162,7 @@ class _BasicPanel extends StatelessWidget {
     return PixelPanel(
       title: '基础状态',
       icon: PixelIcons.heart,
-      accent: p.gold,
+      accent: p.accent,
       child: Column(
         children: [
           NumberField(
@@ -191,13 +182,6 @@ class _BasicPanel extends StatelessWidget {
             onChanged: (v) => controller.setCurrentHp(char, v),
             color: p.danger,
           ),
-          const SizedBox(height: 8),
-          PixelCallout(
-            message: '技能点上限 ${GameLimits.skillPointMax}（与游戏一致，超出会导致游戏卡死）；'
-                '当前 HP 是进入关卡时的初始生命值，进关后会被夹到该角色最大 HP。',
-            icon: PixelIcons.info,
-            tone: PixelBadgeTone.neutral,
-          ),
         ],
       ),
     );
@@ -216,7 +200,7 @@ class _WeaponStatsPanel extends StatelessWidget {
     return PixelPanel(
       title: '属性加点',
       icon: PixelIcons.gear,
-      accent: p.gold,
+      accent: p.accent,
       child: Column(
         children: [
           for (var i = 0; i < weaponStatMeta.length; i++) ...[
@@ -251,7 +235,7 @@ class _StatRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = PixelPalette.of(context);
     final dodge = label == '闪避';
-    final accent = dodge ? p.link : p.goldDeep;
+    final accent = dodge ? p.link : p.accentDeep;
     return Row(
       children: [
         SizedBox(
@@ -269,7 +253,7 @@ class _StatRow extends StatelessWidget {
             value: value.toDouble(),
             min: 0,
             max: max.toDouble(),
-            color: dodge ? p.link : p.gold,
+            color: dodge ? p.link : p.accent,
             onChanged: (v) => onChanged(v.round()),
           ),
         ),
@@ -303,9 +287,8 @@ class _EquipmentPanel extends StatelessWidget {
     final p = PixelPalette.of(context);
     return PixelPanel(
       title: '装备',
-      subtitle: '点击槽位选择物品，长按清空；槽位只显示可装备的分类',
       icon: PixelIcons.shield,
-      accent: p.gold,
+      accent: p.accent,
       child: LayoutBuilder(
         builder: (context, constraints) {
           final cols = constraints.maxWidth >= 640 ? 2 : 1;
@@ -395,7 +378,7 @@ class _SlotTileState extends State<_SlotTile> {
         decoration: BoxDecoration(
           color: _hover ? p.panelAlt : p.paperAlt,
           border: Border.all(
-            color: _hover ? p.gold : p.border,
+            color: _hover ? p.accent : p.border,
             width: PixelSize.border,
           ),
         ),
