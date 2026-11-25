@@ -455,6 +455,16 @@ class _ArchiveInfobox extends StatelessWidget {
               tone: PixelBadgeTone.link,
             ),
           ],
+          if (controller.repairLog.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            PixelCallout(
+              title: '已按游戏上限收敛',
+              message: '以下字段超出游戏可接受范围，已自动修正（否则进游戏会卡死）：\n'
+                  '${controller.repairLog.join('\n')}',
+              icon: PixelIcons.warning,
+              tone: PixelBadgeTone.danger,
+            ),
+          ],
         ],
       ),
     );

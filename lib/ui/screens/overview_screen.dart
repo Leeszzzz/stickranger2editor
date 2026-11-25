@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../main.dart';
+import '../../codec/game_limits.dart';
 import '../../state/editor_controller.dart';
 import '../../theme/pixel_theme.dart';
 import '../widgets/common.dart';
@@ -228,9 +229,14 @@ class _StatGrid extends StatelessWidget {
         formatter: (v) => '$v',
         icon: PixelIcons.star,
         color: p.success,
-        max: '99',
-        onTap: () =>
-            onEdit('设置等级', controller.level, 99, controller.setLevel, '99 级'),
+        max: '${GameLimits.levelMax}',
+        onTap: () => onEdit(
+          '设置等级',
+          controller.level,
+          GameLimits.levelMax,
+          controller.setLevel,
+          '${GameLimits.levelMax} 级',
+        ),
       ),
     ];
     return LayoutBuilder(

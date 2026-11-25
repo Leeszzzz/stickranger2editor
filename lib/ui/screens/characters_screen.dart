@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../main.dart';
+import '../../codec/game_limits.dart';
 import '../../models/game_data.dart';
 import '../../state/editor_controller.dart';
 import '../../theme/pixel_theme.dart';
@@ -10,15 +11,15 @@ import '../widgets/item_picker.dart';
 import '../widgets/pixel_icons.dart';
 import '../widgets/pixel_kit.dart';
 
-/// 属性加点（wb）7 个方向，闪避上限 25，其余 196。
+/// 属性加点（wb）7 个方向，闪避上限 25，其余 196（游戏 `gg()` 硬约束）。
 const List<(String, int)> weaponStatMeta = [
-  ('近战强化', 196),
-  ('中程强化', 196),
-  ('远程强化', 196),
-  ('物理强化', 196),
-  ('元素强化', 196),
-  ('（未知属性）', 196),
-  ('闪避', 25),
+  ('近战强化', GameLimits.weaponStatMax),
+  ('中程强化', GameLimits.weaponStatMax),
+  ('远程强化', GameLimits.weaponStatMax),
+  ('物理强化', GameLimits.weaponStatMax),
+  ('元素强化', GameLimits.weaponStatMax),
+  ('（未知属性）', GameLimits.weaponStatMax),
+  ('闪避', GameLimits.dodgeMax),
 ];
 
 const List<PixelGlyphData> _charIcons = [
@@ -176,8 +177,8 @@ class _BasicPanel extends StatelessWidget {
           NumberField(
             label: '技能点（升级获得）',
             value: controller.skillPoint(char),
-            min: 0,
-            max: 4095,
+            min: GameLimits.skillPointMin,
+            max: GameLimits.skillPointMax,
             onChanged: (v) => controller.setSkillPoint(char, v),
             color: p.link,
           ),
@@ -186,13 +187,14 @@ class _BasicPanel extends StatelessWidget {
             label: '当前 HP',
             value: controller.currentHp(char),
             min: 0,
-            max: 262143,
+            max: GameLimits.currentHpMax,
             onChanged: (v) => controller.setCurrentHp(char, v),
             color: p.danger,
           ),
           const SizedBox(height: 8),
           PixelCallout(
-            message: '技能点为升级获得的可用点数；当前 HP 是进入关卡时的初始生命值。',
+            message: '技能点上限 ${GameLimits.skillPointMax}（与游戏一致，超出会导致游戏卡死）；'
+                '当前 HP 是进入关卡时的初始生命值，进关后会被夹到该角色最大 HP。',
             icon: PixelIcons.info,
             tone: PixelBadgeTone.neutral,
           ),

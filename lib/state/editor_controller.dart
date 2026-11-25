@@ -3,6 +3,8 @@ library;
 
 import 'package:flutter/foundation.dart';
 
+import '../codec/game_guard.dart';
+import '../codec/game_limits.dart';
 import '../codec/save_codec.dart';
 import '../models/game_data.dart';
 
@@ -13,11 +15,15 @@ class EditorController extends ChangeNotifier {
   List<int>? _c;
   String? _sourceString;
   String? _decodeWarning;
+  List<String> _repairLog = const [];
 
   GameCatalog get catalog => _catalog;
   bool get hasSave => _c != null;
   String? get sourceString => _sourceString;
   String? get decodeWarning => _decodeWarning;
+
+  /// 载入时被收敛到游戏允许范围的字段说明（空表示原数据合法）。
+  List<String> get repairLog => _repairLog;
   List<int>? get rawData => _c == null ? null : List.unmodifiable(_c!);
 
   void replaceCatalog(GameCatalog catalog) {
@@ -26,6 +32,9 @@ class EditorController extends ChangeNotifier {
   }
 
   /// 解析并存入存档字符串；失败返回错误消息。
+  ///
+  /// 解码成功后会做一次 [repairForGame]：把任何超出游戏硬范围的字段收敛到
+  /// 边界内（否则导出的存档进游戏会被 `gg()` 判为非法而卡死）。
   String? loadFromString(String saveStr) {
     final DecodeResult r;
     try {
@@ -38,17 +47,24 @@ class EditorController extends ChangeNotifier {
     if (r.data.length < saveLength) {
       return '数据长度异常（${r.data.length}，应为 $saveLength）';
     }
+    final repair = repairForGame(r.data);
     _c = r.data;
     _sourceString = saveStr.trim();
     _decodeWarning = r.dataChecksumWarning;
+    _repairLog = repair.changes;
     notifyListeners();
     return null;
   }
+
+  /// 游戏 `r[]` 中真实存在的物品 ID。装备槽写入未定义的 ID 会让游戏
+  /// 读 `r[id][...]` 时抛异常，所以写入前以它为准。
+  bool _isWritableItem(int id) => GameLimits.isDefinedItem(id);
 
   void unload() {
     _c = null;
     _sourceString = null;
     _decodeWarning = null;
+    _repairLog = const [];
     notifyListeners();
   }
 
@@ -82,15 +98,19 @@ class EditorController extends ChangeNotifier {
   int get stage => _c == null ? 0 : readBits(_c!, Fields.stage, 2);
   int get partyCount => _c?[Fields.party] ?? 0;
 
-  static const maxGold = 16777215;
-  static const maxExp = 16777215;
+  static const maxGold = GameLimits.goldMax;
+  static const maxExp = GameLimits.expMax;
 
-  void setGold(int v) => _edit((c) => writeBits(c, Fields.gold, 4, v.clamp(0, maxGold)));
-  void setExp(int v) => _edit((c) => writeBits(c, Fields.exp, 4, v.clamp(0, maxExp)));
-  void setLevel(int v) => _edit((c) => writeBits(c, Fields.level, 2, v.clamp(0, 4095)));
-  void setStage(int v) => _edit((c) => writeBits(c, Fields.stage, 2, v.clamp(0, 4095)));
-  void setPartyCount(int v) =>
-      _edit((c) => c[Fields.party] = v.clamp(1, 4));
+  void setGold(int v) => _edit(
+      (c) => writeBits(c, Fields.gold, 4, v.clamp(GameLimits.goldMin, GameLimits.goldMax)));
+  void setExp(int v) => _edit(
+      (c) => writeBits(c, Fields.exp, 4, v.clamp(GameLimits.expMin, GameLimits.expMax)));
+  void setLevel(int v) => _edit(
+      (c) => writeBits(c, Fields.level, 2, v.clamp(GameLimits.levelMin, GameLimits.levelMax)));
+  void setStage(int v) => _edit(
+      (c) => writeBits(c, Fields.stage, 2, v.clamp(GameLimits.stageMin, GameLimits.stageMax)));
+  void setPartyCount(int v) => _edit(
+      (c) => c[Fields.party] = v.clamp(GameLimits.partyMin, GameLimits.partyMax));
 
   // ==================== 角色 ====================
 
@@ -105,14 +125,33 @@ class EditorController extends ChangeNotifier {
   int equipment(int ch, int slot) =>
       readBits(_c!, Fields.acStart + (ch * 8 + slot) * 2, 2);
 
-  void setSkillPoint(int ch, int v) =>
-      _edit((c) => writeBits(c, Fields.skillPoints + ch * 2, 2, v.clamp(0, 4095)));
-  void setCurrentHp(int ch, int v) =>
-      _edit((c) => writeBits(c, Fields.currentHp + ch * 3, 3, v.clamp(0, 262143)));
-  void setWeaponStat(int ch, int stat, int v) =>
-      _edit((c) => writeBits(c, Fields.wbStart + (ch * 7 + stat) * 2, 2, v.clamp(0, 4095)));
-  void setEquipment(int ch, int slot, int itemId) =>
-      _edit((c) => writeBits(c, Fields.acStart + (ch * 8 + slot) * 2, 2, itemId.clamp(0, 4095)));
+  void setSkillPoint(int ch, int v) => _edit((c) => writeBits(
+      c,
+      Fields.skillPoints + ch * 2,
+      2,
+      v.clamp(GameLimits.skillPointMin, GameLimits.skillPointMax)));
+  void setCurrentHp(int ch, int v) => _edit((c) => writeBits(
+      c,
+      Fields.currentHp + ch * 3,
+      3,
+      v.clamp(0, GameLimits.currentHpMax)));
+  void setWeaponStat(int ch, int stat, int v) => _edit((c) {
+        final isDodge = stat == 6;
+        writeBits(
+          c,
+          Fields.wbStart + (ch * 7 + stat) * 2,
+          2,
+          v.clamp(
+            isDodge ? GameLimits.dodgeMin : GameLimits.weaponStatMin,
+            isDodge ? GameLimits.dodgeMax : GameLimits.weaponStatMax,
+          ),
+        );
+      });
+  void setEquipment(int ch, int slot, int itemId) => _edit((c) {
+        // 只允许写入游戏 r[] 中真实存在的物品，否则游戏读表会抛异常卡死。
+        final safe = itemId == 0 || _isWritableItem(itemId) ? itemId : 0;
+        writeBits(c, Fields.acStart + (ch * 8 + slot) * 2, 2, safe.clamp(0, 4095));
+      });
 
   // ==================== 背包 ====================
 

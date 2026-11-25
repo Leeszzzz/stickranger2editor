@@ -3,6 +3,7 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../../codec/game_limits.dart';
 import '../../models/game_data.dart';
 import '../../theme/pixel_theme.dart';
 import 'item_icon.dart';
@@ -77,6 +78,8 @@ class _ItemPickerBodyState extends State<_ItemPickerBody> {
     final q = _query.trim().toLowerCase();
     final ids = <int>[];
     for (final id in catalog.items.keys.toList()..sort()) {
+      // 只列出游戏 r[] 真实定义的物品：写入未定义 ID 会让游戏读表异常卡死。
+      if (!GameLimits.isDefinedItem(id)) continue;
       final cat = catalog.itemCategory(id);
       if (accepted != null && !accepted.contains(cat)) continue;
       if (_subtype != '全部' && catalog.categoryLabel(id) != _subtype) continue;

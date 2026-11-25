@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sr2editor/codec/game_limits.dart';
 import 'package:sr2editor/codec/save_codec.dart';
 import 'package:sr2editor/models/game_data.dart';
 import 'package:sr2editor/state/editor_controller.dart';
@@ -156,6 +157,7 @@ void main() {
     test('修改后重新编码可回读', () {
       controller.loadFromString(sampleSave);
       controller
+        // 16777215 是 24 bit 存储上限，但游戏 gg() 只认 9999999，会被收敛。
         ..setGold(16777215)
         ..setExp(12345)
         ..setLevel(99)
@@ -177,7 +179,7 @@ void main() {
 
       final reloaded = EditorController(catalog: controller.catalog)
         ..loadFromString(controller.encode()!);
-      expect(reloaded.gold, 16777215);
+      expect(reloaded.gold, GameLimits.goldMax);
       expect(reloaded.exp, 12345);
       expect(reloaded.level, 99);
       expect(reloaded.stage, 16);
