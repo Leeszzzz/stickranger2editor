@@ -40,17 +40,19 @@ void main() {
       expect(GameLimits.levelMax, lessThan(1 << 12));
     });
 
-    test('物品 ID 白名单覆盖游戏 r[] 的 154 项', () {
+    test('物品 ID 白名单覆盖游戏 r[] 的 155 项', () {
       final ids = [
         for (var i = 0; i < 256; i++)
           if (GameLimits.isDefinedItem(i)) i,
       ];
-      expect(ids.length, 154);
+      expect(ids.length, 155);
       expect(GameLimits.isDefinedItem(0), isTrue); // NONE
       expect(GameLimits.isDefinedItem(114), isTrue); // Garnet Amulet（JSON 缺失但游戏有）
       expect(GameLimits.isDefinedItem(161), isTrue);
+      expect(GameLimits.isDefinedItem(165), isTrue); // Fire tornado（v1.4 新增）
       expect(GameLimits.isDefinedItem(142), isFalse); // r[] 未定义
       expect(GameLimits.isDefinedItem(152), isFalse);
+      expect(GameLimits.isDefinedItem(166), isFalse);
       expect(GameLimits.isDefinedItem(255), isFalse);
     });
   });

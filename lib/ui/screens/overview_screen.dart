@@ -82,7 +82,7 @@ class OverviewScreen extends StatelessWidget {
 
     final catalog = controller.catalog;
     final unlockedStages = [
-      for (var i = 1; i <= 21; i++) i,
+      for (var i = 1; i <= GameLimits.stageMax; i++) i,
     ].where(controller.stageUnlocked).length;
     final achievements = [
       for (var i = 0; i < 128; i++) controller.achievementCompleted(i),

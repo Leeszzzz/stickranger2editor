@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../../app_info.dart';
 import '../../main.dart';
+import '../../codec/game_limits.dart';
 import '../../models/game_data.dart';
 import '../../services/data_updater.dart';
 import '../../services/open_external.dart';
@@ -75,6 +76,34 @@ class _DataScreenState extends State<DataScreen> {
         sourceLabel: '官网更新',
       );
       if (catalog == null) throw '解析结果无法构建目录';
+
+      // 游戏若新增了物品而本版 GameLimits 白名单未跟进，直接写入装备槽
+      // 会让游戏读表异常卡死。这里只告警，不阻断更新（物品数据本身可用）。
+      final unknownItems = [
+        for (final id in catalog.items.keys)
+          if (!GameLimits.isDefinedItem(id)) id,
+      ]..sort();
+      if (unknownItems.isNotEmpty && mounted) {
+        showPixelDialog<void>(
+          context: context,
+          title: '需要更新客户端',
+          icon: PixelIcons.warning,
+          maxWidth: 460,
+          child: Text(
+            '本次数据含 ${unknownItems.length} 个当前版本未支持的物品'
+            '（ID：${unknownItems.join('、')}）。\n\n'
+            '这些物品已可正常浏览，但暂不能装备，请等待客户端更新后再使用。',
+            style: const TextStyle(height: 1.8),
+          ),
+          actions: [
+            PixelButton(
+              label: '知道了',
+              tone: PixelButtonTone.primary,
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        );
+      }
 
       await deps.repository.saveOverride(
         result.itemStatsJson,

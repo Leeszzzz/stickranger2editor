@@ -145,6 +145,38 @@ List<dynamic> _parseSimpleJson(String jsonStr) {
   var i = 0;
   while (i < inner.length) {
     final ch = inner[i];
+    // 嵌套数组：递归解析，避免被拍平（勋章表 jf 就是 [[名,值], ...]）。
+    if (ch == '[') {
+      var depth = 0;
+      var inStr = false;
+      var quote = ' ';
+      var j = i;
+      while (j < inner.length) {
+        final c = inner[j];
+        if (inStr) {
+          if (c == r'') {
+            j += 2;
+            continue;
+          }
+          if (c == quote) inStr = false;
+        } else if (c == '"' || c == "'") {
+          inStr = true;
+          quote = c;
+        } else if (c == '[') {
+          depth++;
+        } else if (c == ']') {
+          depth--;
+          if (depth == 0) break;
+        }
+        j++;
+      }
+      result.add(_parseSimpleJson(inner.substring(i, j + 1)));
+      i = j + 1;
+      while (i < inner.length && (inner[i] == ',' || inner[i] == ' ')) {
+        i++;
+      }
+      continue;
+    }
     if (ch == '"' || ch == "'") {
       var j = i + 1;
       while (j < inner.length && inner[j] != ch) {

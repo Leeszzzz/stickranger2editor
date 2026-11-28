@@ -8,6 +8,7 @@ import '../../theme/pixel_theme.dart';
 import '../widgets/common.dart';
 import '../widgets/pixel_icons.dart';
 import '../widgets/pixel_kit.dart';
+import '../../codec/game_limits.dart';
 import '../widgets/save_actions.dart';
 
 class ProgressScreen extends StatefulWidget {
@@ -42,7 +43,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
     }
 
     final stages = [
-      for (var i = 1; i <= 21; i++) i,
+      for (var i = 1; i <= GameLimits.stageMax; i++) i,
     ].where(controller.stageUnlocked).length;
     final achievements = [
       for (var i = 0; i < 128; i++) controller.achievementCompleted(i),
@@ -64,7 +65,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 breadcrumb: const ['SR2 EDITOR', '进度档案'],
                 icon: PixelIcons.trophy,
                 tags: [
-                  PixelBadge('关卡 $stages/21', tone: PixelBadgeTone.success),
+                  PixelBadge('关卡 $stages/${GameLimits.stageMax}',
+                      tone: PixelBadgeTone.success),
                   PixelBadge('成就 $achievements/128', tone: PixelBadgeTone.accent),
                   PixelBadge('图鉴 $monsters/128', tone: PixelBadgeTone.link),
                 ],
@@ -112,7 +114,7 @@ class _StagesTab extends StatelessWidget {
     final controller = EditorScope.watch(context);
     final catalog = controller.catalog;
     final stages = [
-      for (var i = 1; i <= 21; i++)
+      for (var i = 1; i <= GameLimits.stageMax; i++)
         (id: i, name: catalog.stageName(i), area: catalog.stageArea(i)),
     ];
     final unlocked = stages.where((s) => controller.stageUnlocked(s.id)).length;

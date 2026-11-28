@@ -41,14 +41,14 @@ abstract final class GameLimits {
   /// 由存档里的 `ib[]` 推导，编辑器改的是 `ib[]`，此处仅用于校验。
   static const skillFlagCountMax = 9;
 
-  /// 关卡 ID。`G` 只有 0..21 真正定义，22..31 是空槽。
+  /// 关卡 ID。`G` 只有 0..22 真正定义，23..31 是空槽。
   /// 游戏写入 `q` 后立即 `kg(q)` 读 `ka[q]`，越界会解引用不存在的地图。
   static const stageMin = 0;
-  static const stageMax = 21;
+  static const stageMax = 22;
 
-  /// 编辑器 UI 展示的可编辑关卡数（存档含 32 个标记，前 22 个有效）。
+  /// 编辑器 UI 展示的可编辑关卡数（存档含 32 个标记，前 23 个有效）。
   static const stageMarkerCount = 32;
-  static const stagePlayableCount = 22;
+  static const stagePlayableCount = 23;
 
   /// 每名角色的装备槽数量（存档 `ac[char][slot]`）。
   static const equipmentSlots = 8;
@@ -64,14 +64,14 @@ abstract final class GameLimits {
   ///
   /// 游戏只有这些 ID 有数据；其余（142-144、152-159、165-255）在 `r[]` 里
   /// 是 `undefined`。装备槽写入未定义 ID 会让游戏读 `r[id][...]` 抛异常。
-  /// 数值来自 ranger2.js ver34.1：`0-141, 145-151, 160-164`，共 154 项。
+  /// 数值来自 ranger2.js ver34.1：`0-141, 145-151, 160-165`，共 155 项。
   ///
   /// 注意与内置 `item_stats.json` 的区别：后者由解析脚本生成，遗漏了
   /// 物品 114（Garnet Amulet）等条目，不能当作白名单使用。
   static const List<(int, int)> definedItemRanges = [
     (0, 141),
     (145, 151),
-    (160, 164),
+    (160, 165),
   ];
 
   /// 判断物品 ID 是否为游戏定义过的条目。
